@@ -38,9 +38,6 @@ public class Category {
 	@Column(nullable = false)
 	private TransactionType type;
 
-	@Setter
-	@Column(name = "color_code")
-	private String colorCode;
 
 	@CreationTimestamp
 	@Column(name = "created_at", nullable = false, updatable = false)
