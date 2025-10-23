@@ -4,7 +4,6 @@ import com.example.ExpenseTracker.entities.DTOs.UserRequestDTO;
 import com.example.ExpenseTracker.entities.DTOs.UserResponseDTO;
 import com.example.ExpenseTracker.entities.Users;
 import com.example.ExpenseTracker.repository.UsersRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,22 +15,11 @@ public class UserService {
 
 	private final UsersRepository usersRepository;
 
-	// For password encryption in a real application
-	// Uncomment if you have Spring Security configured
-	// private final PasswordEncoder passwordEncoder;
-
-	@Autowired
 	public UserService(UsersRepository usersRepository) { // , PasswordEncoder passwordEncoder
 		this.usersRepository = usersRepository;
 		// this.passwordEncoder = passwordEncoder;
 	}
 
-	/**
-	 * Creates a new user
-	 *
-	 * @param userRequestDTO the user information
-	 * @return UserResponseDTO containing the created user information
-	 */
 	@Transactional
 	public UserResponseDTO createUser(UserRequestDTO userRequestDTO) {
 		if (userRequestDTO == null) {
@@ -62,6 +50,7 @@ public class UserService {
 		Users user = new Users();
 		user.setName(userRequestDTO.name());
 		user.setEmail(userRequestDTO.email());
+		user.setPhoneNumber(userRequestDTO.phoneNumber());
 
 		// In a real application, you would encode the password
 		// user.setPassword(passwordEncoder.encode(userRequestDTO.password()));
