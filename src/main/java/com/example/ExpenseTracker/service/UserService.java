@@ -46,6 +46,10 @@ public class UserService {
 			throw new IllegalArgumentException("User email cannot be empty");
 		}
 
+		if (userRequestDTO.phoneNumber() == null || userRequestDTO.phoneNumber().trim().isEmpty()) {
+			throw new IllegalArgumentException("User phone cannot be empty");
+		}
+
 		if (userRequestDTO.password() == null || userRequestDTO.password().trim().isEmpty()) {
 			throw new IllegalArgumentException("User password cannot be empty");
 		}
@@ -101,6 +105,10 @@ public class UserService {
 			existingUser.setEmail(userRequestDTO.email());
 		}
 
+		if (userRequestDTO.phoneNumber() != null && !userRequestDTO.phoneNumber().trim().isEmpty()) {
+			existingUser.setPhoneNumber(userRequestDTO.phoneNumber());
+		}
+
 		if (userRequestDTO.password() != null && !userRequestDTO.password().trim().isEmpty()) {
 			// In a real application, you would encode the password
 			// existingUser.setPassword(passwordEncoder.encode(userRequestDTO.password()));
@@ -134,6 +142,7 @@ public class UserService {
 		return new UserResponseDTO(user.getUserId(),
 								   user.getName(),
 								   user.getEmail(),
+								   user.getPhoneNumber(),
 								   user.getCreatedAt(),
 								   user.getUpdatedAt());
 	}
