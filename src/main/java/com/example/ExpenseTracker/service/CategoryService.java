@@ -139,4 +139,9 @@ public class CategoryService {
 								 .map(this::toDTO)
 								 .collect(Collectors.toList());
 	}
+
+	public Long getCategoryIdByName(String categoryName, Long userId) {
+		Category category = categoryRepository.findByUserUserIdAndNameIgnoreCase(userId, categoryName);
+		return category != null ? category.getCategoryId() : null;
+	}
 }
