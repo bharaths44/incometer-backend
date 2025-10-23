@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.example</groupId>
-	<artifactId>ExpenseTracker</artifactId>
+	<artifactId>expensetracker</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>ExpenseTracker</name>
+	<name>expensetracker</name>
 	<description>A simple expense tracker</description>
 	<url/>
 	<licenses>
