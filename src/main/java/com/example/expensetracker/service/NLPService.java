@@ -4,34 +4,30 @@ import com.example.expensetracker.entities.DTOs.ExpenseRequestDTO;
 import com.example.expensetracker.entities.PendingCategory;
 import com.example.expensetracker.entities.TransactionType;
 import com.example.expensetracker.entities.Users;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.genai.client.GenerativeModel;
-import com.google.genai.client.java.GenerativeModelFutures;
-import com.google.genai.client.java.Part;
-import com.google.genai.client.java.Response;
-import com.google.genai.client.java.StringPart;
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.util.CoreMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import java.util.*;
 
 @Service
 public class NLPService {
 
+	private final StanfordCoreNLP pipeline;
 	private static final Logger logger = LoggerFactory.getLogger(NLPService.class);
-	private final GenerativeModel geminiModel;
-	private final ObjectMapper objectMapper = new ObjectMapper();
 
-	public NLPService(@Value("${gemini.api.key}") String apiKey) {
-		this.geminiModel = new GenerativeModel("gemini-1.5-flash", apiKey);
+	public NLPService() {
+		Properties props = new Properties();
+		props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
+		props.setProperty("ner.useSUTime", "true");
+		this.pipeline = new StanfordCoreNLP(props);
 	}
 
 	public String handlePendingCategory(Users user,
@@ -181,35 +177,110 @@ public class NLPService {
 	// ---------------- Utility Methods ----------------
 
 	private ExtractionResult extractAmountCategoryPaymentDate(String body, TransactionType type) {
-		try {
-			String prompt = "Extract structured expense/income information from the following text:\n" + "Text: \"" + body + "\"\n" + "Return JSON with fields: amount (number), category (string), payment_method (string), date (YYYY-MM-DD). " + "If a field cannot be determined, leave it null. " + "Transaction type: " + type.name();
+		BigDecimal amount = null;
+		String categoryName = "";
+		String paymentMethod = type == TransactionType.EXPENSE ? "Cash" : "Bank Account";
+		LocalDate date = LocalDate.now();
 
-			GenerativeModelFutures modelFutures = GenerativeModelFutures.from(geminiModel);
-			CompletableFuture<Response> responseFuture = modelFutures.generateContent(new StringPart(prompt));
-			String json = responseFuture.get().getText();
+		String lowerBody = body.toLowerCase();
 
-			logger.info("Gemini response: {}", json);
+		Annotation document = new Annotation(body);
+		pipeline.annotate(document);
 
-			// Simple JSON parsing
-			// Expecting: {"amount": 250.0, "category": "Food", "payment_method": "Cash", "date": "2025-10-24"}
-			Map<String, Object> map = objectMapper.readValue(json, Map.class);
+		List<String> tokens = new ArrayList<>();
+		int moneyIndex = -1;
 
-			BigDecimal amount = map.get("amount") != null ? new BigDecimal(map.get("amount").toString()) : null;
-			String category = map.getOrDefault("category", "").toString();
-			String paymentMethod = map.getOrDefault("payment_method",
-													type == TransactionType.EXPENSE ? "Cash" : "Bank Account")
-									  .toString();
-			LocalDate date = map.get("date") != null ? LocalDate.parse(map.get("date").toString()) : LocalDate.now();
-
-			return new ExtractionResult(amount, category, paymentMethod, date);
-
-		} catch (Exception e) {
-			logger.error("Error in Gemini extraction", e);
-			return new ExtractionResult(null,
-										type == TransactionType.EXPENSE ? "Miscellaneous" : "Bank Account",
-										type == TransactionType.EXPENSE ? "Cash" : "Bank Account",
-										LocalDate.now());
+		for (CoreMap sentence : document.get(CoreAnnotations.SentencesAnnotation.class)) {
+			for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
+				String word = token.get(CoreAnnotations.TextAnnotation.class);
+				String ner = token.get(CoreAnnotations.NamedEntityTagAnnotation.class);
+				tokens.add(word);
+				if ("MONEY".equals(ner) && amount == null) {
+					try {
+						String cleaned = word.replaceAll("[^0-9.]", "");
+						if (!cleaned.isEmpty()) {
+							amount = new BigDecimal(cleaned);
+							moneyIndex = tokens.size() - 1;
+						}
+					} catch (NumberFormatException ignored) {
+					}
+				}
+			}
 		}
+
+		// Fallback regex if NLP fails
+		if (amount == null) {
+			String[] fallbackTokens = body.split("\\s+");
+			for (String token : fallbackTokens) {
+				try {
+					amount = new BigDecimal(token.replaceAll("[^0-9.]", ""));
+					break;
+				} catch (NumberFormatException ignored) {
+				}
+			}
+			if (amount != null) {
+				String amtStr = amount.toPlainString();
+				String[] fallbackTokens2 = body.split("\\s+");
+				for (int i = 0; i < fallbackTokens2.length; i++) {
+					if (fallbackTokens2[i].replaceAll("[^0-9.]", "").equals(amtStr)) {
+						moneyIndex = i;
+						break;
+					}
+				}
+			}
+		}
+
+		// Category extraction
+		Set<String> stopWords = new HashSet<>(Arrays.asList("using", "in", "yesterday", "today", "tomorrow"));
+		StringBuilder categoryBuilder = new StringBuilder();
+		for (int i = moneyIndex + 1; i < tokens.size(); i++) {
+			String word = tokens.get(i).toLowerCase();
+			if (stopWords.contains(word)) break;
+			categoryBuilder.append(tokens.get(i)).append(" ");
+		}
+		categoryName = categoryBuilder.toString().trim();
+		if (categoryName.isEmpty()) {
+			categoryName = type == TransactionType.EXPENSE ? "Miscellaneous" : "Bank Account";
+		}
+
+		// For income, if no "in", assume first word is category, rest is payment method
+		if (type == TransactionType.INCOME) {
+			String[] parts = categoryName.split("\\s+", 2);
+			if (parts.length >= 1) {
+				categoryName = parts[0];
+				if (parts.length > 1 && !lowerBody.contains(" in ")) {
+					paymentMethod = parts[1].toUpperCase();
+				}
+			}
+		}
+
+		// For expense, if no "using", assume first word is category, rest is payment method
+		if (type == TransactionType.EXPENSE) {
+			String[] parts = categoryName.split("\\s+", 2);
+			if (parts.length >= 1) {
+				categoryName = parts[0];
+				if (parts.length > 1 && !lowerBody.contains("using")) {
+					paymentMethod = parts[1].toUpperCase();
+				}
+			}
+		}
+
+		// Payment method
+		if (type == TransactionType.EXPENSE && lowerBody.contains("using")) {
+			int idx = lowerBody.indexOf("using") + 5;
+			String[] parts = body.substring(idx).trim().split("\\s+");
+			if (parts.length > 0) paymentMethod = parts[0].toUpperCase();
+		} else if (type == TransactionType.INCOME && lowerBody.contains(" in ")) {
+			int idx = lowerBody.indexOf(" in ") + 4;
+			String[] parts = body.substring(idx).trim().split("\\s+");
+			if (parts.length > 0) paymentMethod = parts[0].toUpperCase();
+		}
+
+		// Date
+		if (lowerBody.contains("yesterday")) date = LocalDate.now().minusDays(1);
+		else if (lowerBody.contains("tomorrow")) date = LocalDate.now().plusDays(1);
+
+		return new ExtractionResult(amount, categoryName, paymentMethod, date);
 	}
 
 	private String findClosestCategory(String categoryName, List<String> existingCategories) {
