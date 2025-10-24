@@ -3,6 +3,7 @@ package com.example.expensetracker.service;
 import com.example.expensetracker.entities.Category;
 import com.example.expensetracker.entities.DTOs.CategoryRequestDTO;
 import com.example.expensetracker.entities.DTOs.CategoryResponseDTO;
+import com.example.expensetracker.entities.TransactionType;
 import com.example.expensetracker.repository.CategoryRepository;
 import com.example.expensetracker.repository.ExpenseRepository;
 import com.example.expensetracker.repository.UsersRepository;
@@ -143,5 +144,38 @@ public class CategoryService {
 	public Long getCategoryIdByName(String categoryName, Long userId) {
 		Category category = categoryRepository.findByUserUserIdAndNameIgnoreCase(userId, categoryName);
 		return category != null ? category.getCategoryId() : null;
+	}
+
+	public List<String> getAllCategoryNamesForUser(Long userId) {
+		// Get user categories
+		List<Category> userCategories = categoryRepository.findByUserUserId(userId);
+		return userCategories.stream()
+							 .map(Category::getName)
+							 .collect(Collectors.toList());
+	}
+
+	public List<String> getAllCategoryNamesForUserByType(Long userId, TransactionType type) {
+		// Get user categories by type
+		List<Category> userCategories = categoryRepository.findByUserUserIdAndType(userId, type);
+		return userCategories.stream()
+							 .map(Category::getName)
+							 .collect(Collectors.toList());
+	}
+
+	@Transactional
+	public Long createCategoryForUser(String categoryName, Long userId, TransactionType type) {
+		Category category = new Category();
+		category.setName(capitalize(categoryName));
+		category.setType(type);
+		// Set user
+		category.setUser(usersRepository.findById(userId)
+										.orElseThrow(() -> new RuntimeException("User not found")));
+		Category saved = categoryRepository.save(category);
+		return saved.getCategoryId();
+	}
+
+	private String capitalize(String str) {
+		if (str == null || str.isEmpty()) return str;
+		return str.substring(0, 1).toUpperCase() + str.substring(1).toLowerCase();
 	}
 }
