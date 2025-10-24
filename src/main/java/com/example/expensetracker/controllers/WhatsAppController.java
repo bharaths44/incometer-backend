@@ -1,6 +1,8 @@
 package com.example.expensetracker.controllers;
 
 import com.example.expensetracker.service.WhatsAppMessageProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/whatsapp")
 public class WhatsAppController {
 
+	private static final Logger logger = LoggerFactory.getLogger(WhatsAppController.class);
 	private final WhatsAppMessageProcessor messageProcessor;
 
 	public WhatsAppController(WhatsAppMessageProcessor messageProcessor) {
@@ -31,6 +34,7 @@ public class WhatsAppController {
 		System.out.println("Body: " + body);
 
 		String reply = messageProcessor.processMessage(phoneNumber, body);
+		logger.info("Reply to send: {}", reply);
 		return ResponseEntity.ok(reply);
 	}
 
