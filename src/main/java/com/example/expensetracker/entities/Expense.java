@@ -19,13 +19,12 @@ import java.util.Objects;
 @Table(name = "expenses")
 public class Expense {
 
-	@Setter
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "expense_id")
 	private Long expenseId;
 
-	@Setter
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "user_id", nullable = false)
 	@ToString.Exclude
@@ -36,19 +35,17 @@ public class Expense {
 	@ToString.Exclude
 	private Category category;
 
-	@Setter
 	@Column(nullable = false, precision = 10, scale = 2)
 	private BigDecimal amount;
 
-	@Setter
 	@Lob
 	private String description;
 
-	@Setter
+
 	@Column(name = "payment_method")
 	private String paymentMethod;
 
-	@Setter
+
 	@Column(name = "expense_date")
 	private LocalDate expenseDate;
 

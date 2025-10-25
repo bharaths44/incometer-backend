@@ -19,25 +19,20 @@ import java.util.Objects;
 @Table(name = "users")
 public class Users {
 
-	@Setter
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "user_id")
 	private Long userId;
 
-	@Setter
 	@Column(nullable = false)
 	private String name;
 
-	@Setter
 	@Column(nullable = false, unique = true)
 	private String email;
 
-	@Setter
 	@Column(nullable = false, unique = true)
 	private String phoneNumber;
 
-	@Setter
 	@Column(nullable = false)
 	private String password;
 
