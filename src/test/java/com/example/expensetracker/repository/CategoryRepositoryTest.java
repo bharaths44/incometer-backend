@@ -30,7 +30,7 @@ public class CategoryRepositoryTest {
 	@BeforeEach
 	void setUp() {
 		user = createUser();
-		Category category = createCategory(user);
+		createCategory(user);
 	}
 
 	private Users createUser() {
@@ -42,12 +42,12 @@ public class CategoryRepositoryTest {
 		return usersRepository.save(u);
 	}
 
-	private Category createCategory(Users user) {
+	private void createCategory(Users user) {
 		Category c = new Category();
 		c.setUser(user);
 		c.setName("Food");
 		c.setType(TransactionType.EXPENSE);
-		return categoryRepository.save(c);
+		categoryRepository.save(c);
 	}
 
 	@Test

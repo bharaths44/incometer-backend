@@ -58,7 +58,7 @@ public class ExpenseRepositoryTest {
 		return categoryRepository.save(c);
 	}
 
-	private Expense createExpense(Users user, Category category, BigDecimal amount, String description) {
+	private void createExpense(Users user, Category category, BigDecimal amount, String description) {
 		Expense e = new Expense();
 		e.setUser(user);
 		e.setCategory(category);
@@ -66,12 +66,12 @@ public class ExpenseRepositoryTest {
 		e.setDescription(description);
 		e.setPaymentMethod("Cash");
 		e.setExpenseDate(LocalDate.now());
-		return expenseRepository.save(e);
+		expenseRepository.save(e);
 	}
 
 	@Test
 	void testFindByUserUserId() {
-		Expense expense = createExpense(user, category, BigDecimal.valueOf(50), "Lunch");
+		createExpense(user, category, BigDecimal.valueOf(50), "Lunch");
 
 		List<Expense> result = expenseRepository.findByUserUserId(user.getUserId());
 		assertEquals(1, result.size());
