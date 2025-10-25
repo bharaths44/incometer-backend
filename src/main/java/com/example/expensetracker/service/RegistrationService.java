@@ -1,7 +1,6 @@
 package com.example.expensetracker.service;
 
 import com.example.expensetracker.entities.DTOs.UserRequestDTO;
-import com.example.expensetracker.entities.Users;
 import com.example.expensetracker.repository.UsersRepository;
 import org.springframework.stereotype.Service;
 
