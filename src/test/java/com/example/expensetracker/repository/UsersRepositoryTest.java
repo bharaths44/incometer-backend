@@ -18,16 +18,16 @@ public class UsersRepositoryTest {
 
 	@BeforeEach
 	void setUp() {
-		Users user = createUser();
+		createUser();
 	}
 
-	private Users createUser() {
+	private void createUser() {
 		Users u = new Users();
 		u.setName("Test User");
 		u.setEmail("test@example.com");
 		u.setPhoneNumber("1234567890");
 		u.setPassword("password");
-		return usersRepository.save(u);
+		usersRepository.save(u);
 	}
 
 	@Test
