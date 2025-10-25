@@ -15,9 +15,8 @@ public class UserService {
 
 	private final UsersRepository usersRepository;
 
-	public UserService(UsersRepository usersRepository) { // , PasswordEncoder passwordEncoder
+	public UserService(UsersRepository usersRepository) {
 		this.usersRepository = usersRepository;
-		// this.passwordEncoder = passwordEncoder;
 	}
 
 	@Transactional
