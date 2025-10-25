@@ -19,13 +19,11 @@ import java.util.Objects;
 @AllArgsConstructor
 public class Income {
 
-	@Setter
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "income_id")
 	private Long incomeId;
 
-	@Setter
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "user_id", nullable = false)
 	@ToString.Exclude
@@ -33,11 +31,9 @@ public class Income {
 
 	private String source;
 
-	@Setter
 	@Column(nullable = false, precision = 10, scale = 2)
 	private BigDecimal amount;
 
-	@Setter
 	@Column(name = "received_date")
 	private LocalDate receivedDate;
 

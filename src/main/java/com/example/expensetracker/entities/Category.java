@@ -17,23 +17,21 @@ import java.util.Objects;
 @Table(name = "categories")
 public class Category {
 
-	@Setter
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "category_id")
 	private Long categoryId;
 
-	@Setter
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "user_id", nullable = false)
 	@ToString.Exclude
 	private Users user;
 
-	@Setter
+
 	@Column(nullable = false)
 	private String name;
 
-	@Setter
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private TransactionType type;
@@ -52,8 +50,7 @@ public class Category {
 														 .getPersistentClass()
 								   : o.getClass();
 		Class<?> thisEffectiveClass = this instanceof HibernateProxy
-									  ? ((HibernateProxy) this).getHibernateLazyInitializer()
-															   .getPersistentClass()
+									  ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass()
 									  : this.getClass();
 		if (thisEffectiveClass != oEffectiveClass) return false;
 		Category category = (Category) o;

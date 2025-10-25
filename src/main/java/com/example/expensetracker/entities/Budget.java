@@ -18,32 +18,32 @@ import java.util.Objects;
 @Table(name = "budgets")
 public class Budget {
 
-	@Setter
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "budget_id")
 	private Long budgetId;
 
-	@Setter
+
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "user_id", nullable = false)
 	@ToString.Exclude
 	private Users user;
 
-	@Setter
+
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "category_id", nullable = false)
 	@ToString.Exclude
 	private Category category;
 
-	@Setter
 	@Column(name = "amount_limit", nullable = false, precision = 10, scale = 2)
 	private BigDecimal amountLimit;
 
-	@Setter
-	private Integer month;
-	@Setter
-	private Integer year;
+	@Column(name = "month_limit")
+	private Integer monthLimit;
+
+	@Column(name = "year_limit")
+	private Integer yearLimit;
 
 	@CreationTimestamp
 	@Column(name = "created_at", nullable = false, updatable = false)
