@@ -8,10 +8,10 @@
         <version>3.5.6</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.example</groupId>
-    <artifactId>expensetracker</artifactId>
+    <groupId>com.bharath.incometer</groupId>
+    <artifactId>incometer</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>expensetracker</name>
+    <name>incometer</name>
     <description>A simple expense tracker</description>
     <url/>
     <licenses>
