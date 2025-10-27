@@ -17,7 +17,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 	List<Expense> findByUserUserId(Long userId);
 
 	List<Expense> findByUserUserIdAndExpenseDateBetween(
-			Long userId, LocalDate startDate, LocalDate endDate);
+		Long userId, LocalDate startDate, LocalDate endDate);
 
 	List<Expense> findByUserUserIdAndCategoryCategoryId(Long userId, Long categoryId);
 
@@ -25,11 +25,11 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 	BigDecimal sumAmountByUserId(@Param("userId") Long userId);
 
 	@Query(
-			"SELECT SUM(e.amount) FROM Expense e WHERE e.user.userId = :userId " +
-			"AND e.expenseDate BETWEEN :startDate AND :endDate"
+		"SELECT SUM(e.amount) FROM Expense e WHERE e.user.userId = :userId " +
+		"AND e.expenseDate BETWEEN :startDate AND :endDate"
 	)
 	BigDecimal sumAmountByUserIdAndDateRange(
-			@Param("userId") Long userId,
-			@Param("startDate") LocalDate startDate,
-			@Param("endDate") LocalDate endDate);
+		@Param("userId") Long userId,
+		@Param("startDate") LocalDate startDate,
+		@Param("endDate") LocalDate endDate);
 }

@@ -15,10 +15,10 @@ public class CategoryMatchingFuzzy {
 	public String findClosestCategory(String categoryName, List<String> existingCategories) {
 		String categoryNameLower = categoryName.toLowerCase();
 		return existingCategories.stream()
-								 .min(Comparator.comparingInt(c -> levenshteinDistance(c.toLowerCase(),
-																					   categoryNameLower)))
-								 .filter(c -> levenshteinDistance(c.toLowerCase(), categoryNameLower) <= 2)
-								 .orElse(null);
+		                         .min(Comparator.comparingInt(c -> levenshteinDistance(c.toLowerCase(),
+		                                                                               categoryNameLower)))
+		                         .filter(c -> levenshteinDistance(c.toLowerCase(), categoryNameLower) <= 2)
+		                         .orElse(null);
 	}
 
 	/**
