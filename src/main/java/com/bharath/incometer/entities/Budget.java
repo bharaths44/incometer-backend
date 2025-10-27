@@ -1,13 +1,13 @@
 package com.bharath.incometer.entities;
 
+import com.bharath.incometer.enums.BudgetFrequency;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.proxy.HibernateProxy;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Entity
 @NoArgsConstructor
@@ -18,59 +18,37 @@ import java.util.Objects;
 @Table(name = "budgets")
 public class Budget {
 
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "budget_id")
 	private Long budgetId;
-
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "user_id", nullable = false)
-	@ToString.Exclude
 	private Users user;
-
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "category_id", nullable = false)
-	@ToString.Exclude
 	private Category category;
 
 	@Column(name = "amount_limit", nullable = false, precision = 10, scale = 2)
 	private BigDecimal amountLimit;
 
-	@Column(name = "month_limit")
-	private Integer monthLimit;
+	// ✅ Start and end dates for the budget period
+	@Column(name = "start_date")
+	private LocalDate startDate;
+	@Column(name = "end_date")
+	private LocalDate endDate;
 
-	@Column(name = "year_limit")
-	private Integer yearLimit;
+	// ✅ New fields
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private BudgetFrequency frequency;  // e.g., ONE_TIME, WEEKLY, MONTHLY, YEARLY
+
+	@Column(name = "is_active")
+	private boolean active = true;  // For disabling recurring budgets
 
 	@CreationTimestamp
-	@Column(name = "created_at", nullable = false, updatable = false)
 	private LocalDateTime createdAt;
-
-	@Override
-	public final boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null) return false;
-		Class<?> oEffectiveClass = o instanceof HibernateProxy
-		                           ? ((HibernateProxy) o).getHibernateLazyInitializer()
-		                                                 .getPersistentClass()
-		                           : o.getClass();
-		Class<?> thisEffectiveClass = this instanceof HibernateProxy
-		                              ? ((HibernateProxy) this).getHibernateLazyInitializer()
-		                                                       .getPersistentClass()
-		                              : this.getClass();
-		if (thisEffectiveClass != oEffectiveClass) return false;
-		Budget budget = (Budget) o;
-		return getBudgetId() != null && Objects.equals(getBudgetId(), budget.getBudgetId());
-	}
-
-	@Override
-	public final int hashCode() {
-		return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
-		                                                               .getPersistentClass()
-		                                                               .hashCode() : getClass().hashCode();
-	}
 }
+
 

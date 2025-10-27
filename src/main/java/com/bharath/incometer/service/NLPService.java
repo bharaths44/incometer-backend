@@ -1,8 +1,8 @@
 package com.bharath.incometer.service;
 
 import com.bharath.incometer.entities.DTOs.ExpenseRequestDTO;
-import com.bharath.incometer.entities.PendingCategory;
-import com.bharath.incometer.entities.TransactionType;
+import com.bharath.incometer.models.PendingCategory;
+import com.bharath.incometer.enums.TransactionType;
 import com.bharath.incometer.entities.Users;
 import com.bharath.incometer.utils.CategoryMatchingFuzzy;
 import com.bharath.incometer.utils.PaymentMethodFormatter;
