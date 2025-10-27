@@ -49,13 +49,13 @@ public class Users {
 		if (this == o) return true;
 		if (o == null) return false;
 		Class<?> oEffectiveClass = o instanceof HibernateProxy
-								   ? ((HibernateProxy) o).getHibernateLazyInitializer()
-														 .getPersistentClass()
-								   : o.getClass();
+		                           ? ((HibernateProxy) o).getHibernateLazyInitializer()
+		                                                 .getPersistentClass()
+		                           : o.getClass();
 		Class<?> thisEffectiveClass = this instanceof HibernateProxy
-									  ? ((HibernateProxy) this).getHibernateLazyInitializer()
-															   .getPersistentClass()
-									  : this.getClass();
+		                              ? ((HibernateProxy) this).getHibernateLazyInitializer()
+		                                                       .getPersistentClass()
+		                              : this.getClass();
 		if (thisEffectiveClass != oEffectiveClass) return false;
 		Users users = (Users) o;
 		return getUserId() != null && Objects.equals(getUserId(), users.getUserId());
@@ -64,8 +64,8 @@ public class Users {
 	@Override
 	public final int hashCode() {
 		return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
-																	   .getPersistentClass()
-																	   .hashCode() : getClass().hashCode();
+		                                                               .getPersistentClass()
+		                                                               .hashCode() : getClass().hashCode();
 	}
 }
 

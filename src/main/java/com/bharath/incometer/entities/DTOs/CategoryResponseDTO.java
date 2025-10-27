@@ -10,10 +10,11 @@ import java.time.LocalDateTime;
  * DTO for {@link Category}
  */
 public record CategoryResponseDTO(
-		Long categoryId,
-		Long userId,
-		String name,
-		TransactionType type,
-		LocalDateTime createdAt
+	Long categoryId,
+	Long userId,
+	String name,
+	String icon,
+	TransactionType type,
+	LocalDateTime createdAt
 ) implements Serializable {
 }

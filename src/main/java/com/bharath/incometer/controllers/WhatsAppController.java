@@ -22,9 +22,9 @@ public class WhatsAppController {
 
 	@PostMapping("/webhook")
 	public ResponseEntity<String> receiveMessage(
-			@RequestParam("From") String from,
-			@RequestParam("Body") String body
-												) {
+		@RequestParam("From") String from,
+		@RequestParam("Body") String body
+	) {
 		// Trim "whatsapp:" prefix and only use phone number
 		String phoneNumber = from.startsWith("whatsapp:") ? from.substring(9) : from;
 

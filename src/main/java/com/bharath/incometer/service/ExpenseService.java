@@ -24,8 +24,8 @@ public class ExpenseService {
 	private final UsersRepository usersRepository;
 
 	public ExpenseService(ExpenseRepository expenseRepository,
-						  CategoryRepository categoryRepository,
-						  UsersRepository usersRepository) {
+	                      CategoryRepository categoryRepository,
+	                      UsersRepository usersRepository) {
 		this.expenseRepository = expenseRepository;
 		this.categoryRepository = categoryRepository;
 		this.usersRepository = usersRepository;
@@ -33,14 +33,14 @@ public class ExpenseService {
 
 	private ExpenseResponseDTO toDTO(Expense expense) {
 		return new ExpenseResponseDTO(
-				expense.getExpenseId(),
-				expense.getUser().getUserId(),
-				expense.getCategory().getCategoryId(),
-				expense.getAmount(),
-				expense.getDescription(),
-				expense.getPaymentMethod(),
-				expense.getExpenseDate(),
-				expense.getCreatedAt()
+			expense.getExpenseId(),
+			expense.getUser().getUserId(),
+			expense.getCategory().getCategoryId(),
+			expense.getAmount(),
+			expense.getDescription(),
+			expense.getPaymentMethod(),
+			expense.getExpenseDate(),
+			expense.getCreatedAt()
 		);
 	}
 
@@ -48,10 +48,12 @@ public class ExpenseService {
 		Expense expense = new Expense();
 
 		Users user = usersRepository.findById(expenseRequestDTO.userId())
-									.orElseThrow(() -> new RuntimeException("User not found with id: " + expenseRequestDTO.userId()));
+		                            .orElseThrow(() -> new RuntimeException(
+			                            "User not found with id: " + expenseRequestDTO.userId()));
 
 		Category category = categoryRepository.findById(expenseRequestDTO.categoryId())
-											  .orElseThrow(() -> new RuntimeException("Category not found with id: " + expenseRequestDTO.categoryId()));
+		                                      .orElseThrow(() -> new RuntimeException(
+			                                      "Category not found with id: " + expenseRequestDTO.categoryId()));
 
 		// Validate that category belongs to the user
 		if (!category.getUser().getUserId().equals(expenseRequestDTO.userId())) {
@@ -116,7 +118,8 @@ public class ExpenseService {
 		validateExpenseRequest(dto);
 
 		Expense expense = expenseRepository.findById(expenseId)
-										   .orElseThrow(() -> new RuntimeException("Expense not found with id: " + expenseId));
+		                                   .orElseThrow(() -> new RuntimeException(
+			                                   "Expense not found with id: " + expenseId));
 
 		// Security check: ensure the expense belongs to the user making the request
 		if (!expense.getUser().getUserId().equals(dto.userId())) {
@@ -125,7 +128,8 @@ public class ExpenseService {
 
 		// Validate and update category
 		Category category = categoryRepository.findById(dto.categoryId())
-											  .orElseThrow(() -> new RuntimeException("Category not found with id: " + dto.categoryId()));
+		                                      .orElseThrow(() -> new RuntimeException(
+			                                      "Category not found with id: " + dto.categoryId()));
 
 		if (!category.getUser().getUserId().equals(dto.userId())) {
 			throw new RuntimeException("Category does not belong to the specified user");
@@ -152,7 +156,7 @@ public class ExpenseService {
 		}
 
 		Expense expense = expenseRepository.findById(id)
-										   .orElseThrow(() -> new RuntimeException("Expense not found with id: " + id));
+		                                   .orElseThrow(() -> new RuntimeException("Expense not found with id: " + id));
 
 		// Security check: ensure the expense belongs to the user
 		if (!expense.getUser().getUserId().equals(userId)) {
@@ -169,7 +173,7 @@ public class ExpenseService {
 		}
 
 		Expense expense = expenseRepository.findById(id)
-										   .orElseThrow(() -> new RuntimeException("Expense not found with id: " + id));
+		                                   .orElseThrow(() -> new RuntimeException("Expense not found with id: " + id));
 
 		// Security check
 		if (!expense.getUser().getUserId().equals(userId)) {
@@ -182,9 +186,9 @@ public class ExpenseService {
 	@Transactional(readOnly = true)
 	public List<ExpenseResponseDTO> getAllExpenses() {
 		return expenseRepository.findAll()
-								.stream()
-								.map(this::toDTO)
-								.collect(Collectors.toList());
+		                        .stream()
+		                        .map(this::toDTO)
+		                        .collect(Collectors.toList());
 	}
 
 	@Transactional(readOnly = true)
@@ -194,14 +198,14 @@ public class ExpenseService {
 		}
 
 		return expenseRepository.findByUserUserId(userId)
-								.stream()
-								.map(this::toDTO)
-								.collect(Collectors.toList());
+		                        .stream()
+		                        .map(this::toDTO)
+		                        .collect(Collectors.toList());
 	}
 
 	@Transactional(readOnly = true)
 	public List<ExpenseResponseDTO> getExpensesByUserIdAndDateRange(
-			Long userId, LocalDate startDate, LocalDate endDate) {
+		Long userId, LocalDate startDate, LocalDate endDate) {
 
 		if (userId == null) {
 			throw new IllegalArgumentException("User ID cannot be null");
@@ -216,9 +220,9 @@ public class ExpenseService {
 		}
 
 		return expenseRepository.findByUserUserIdAndExpenseDateBetween(userId, startDate, endDate)
-								.stream()
-								.map(this::toDTO)
-								.collect(Collectors.toList());
+		                        .stream()
+		                        .map(this::toDTO)
+		                        .collect(Collectors.toList());
 	}
 
 	@Transactional(readOnly = true)
@@ -228,9 +232,9 @@ public class ExpenseService {
 		}
 
 		return expenseRepository.findByUserUserIdAndCategoryCategoryId(userId, categoryId)
-								.stream()
-								.map(this::toDTO)
-								.collect(Collectors.toList());
+		                        .stream()
+		                        .map(this::toDTO)
+		                        .collect(Collectors.toList());
 	}
 
 	@Transactional(readOnly = true)
@@ -244,7 +248,7 @@ public class ExpenseService {
 
 	@Transactional(readOnly = true)
 	public BigDecimal getTotalExpensesByUserIdAndDateRange(
-			Long userId, LocalDate startDate, LocalDate endDate) {
+		Long userId, LocalDate startDate, LocalDate endDate) {
 
 		if (userId == null) {
 			throw new IllegalArgumentException("User ID cannot be null");

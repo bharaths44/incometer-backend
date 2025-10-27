@@ -17,8 +17,8 @@ public class TransactionMessageHandler {
 	private final Map<String, PendingCategory> pendingCategoryMap = new HashMap<>();
 
 	public TransactionMessageHandler(ExpenseService expenseService,
-									 CategoryService categoryService,
-									 NLPService nlpService) {
+	                                 CategoryService categoryService,
+	                                 NLPService nlpService) {
 		this.expenseService = expenseService;
 		this.categoryService = categoryService;
 		this.nlpService = nlpService;
@@ -38,11 +38,11 @@ public class TransactionMessageHandler {
 		}
 
 		return """
-			   ⚠️ Unknown command. Try:
-			   - Register <Name>\
-			   
-			   - Expense <Amount> <Category> <Payment Method> <Optional:Date>\
-			   
-			   - Income <Amount> <Source> <Payment Method> <Optional:Date>""";
+			⚠️ Unknown command. Try:
+			- Register <Name>\
+			
+			- Expense <Amount> <Category> <Payment Method> <Optional:Date>\
+			
+			- Income <Amount> <Source> <Payment Method> <Optional:Date>""";
 	}
 }
