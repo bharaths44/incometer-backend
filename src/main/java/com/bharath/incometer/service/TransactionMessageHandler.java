@@ -1,6 +1,6 @@
 package com.bharath.incometer.service;
 
-import com.bharath.incometer.entities.PendingCategory;
+import com.bharath.incometer.models.PendingCategory;
 import com.bharath.incometer.entities.Users;
 import org.springframework.stereotype.Service;
 

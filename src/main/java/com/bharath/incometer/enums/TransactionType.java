@@ -1,4 +1,4 @@
-package com.bharath.incometer.entities;
+package com.bharath.incometer.enums;
 
 public enum TransactionType {
 	EXPENSE,

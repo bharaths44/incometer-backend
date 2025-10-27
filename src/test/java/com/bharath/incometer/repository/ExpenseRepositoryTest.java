@@ -2,7 +2,7 @@ package com.bharath.incometer.repository;
 
 import com.bharath.incometer.entities.Category;
 import com.bharath.incometer.entities.Expense;
-import com.bharath.incometer.entities.TransactionType;
+import com.bharath.incometer.enums.TransactionType;
 import com.bharath.incometer.entities.Users;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;

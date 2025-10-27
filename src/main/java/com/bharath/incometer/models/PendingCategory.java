@@ -1,4 +1,6 @@
-package com.bharath.incometer.entities;
+package com.bharath.incometer.models;
+
+import com.bharath.incometer.enums.TransactionType;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
