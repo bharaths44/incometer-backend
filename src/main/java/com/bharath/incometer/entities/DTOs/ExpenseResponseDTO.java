@@ -11,13 +11,13 @@ import java.time.LocalDateTime;
  * DTO for {@link Expense}
  */
 public record ExpenseResponseDTO(
-		Long expenseId,
-		Long userId,
-		Long categoryId,
-		BigDecimal amount,
-		String description,
-		String paymentMethod,
-		LocalDate expenseDate,
-		LocalDateTime createdAt
+	Long expenseId,
+	Long userId,
+	Long categoryId,
+	BigDecimal amount,
+	String description,
+	String paymentMethod,
+	LocalDate expenseDate,
+	LocalDateTime createdAt
 ) implements Serializable {
 }

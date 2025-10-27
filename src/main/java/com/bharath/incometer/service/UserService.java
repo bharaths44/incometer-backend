@@ -10,8 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service
-public class UserService {
+@Service public class UserService {
 
 	private final UsersRepository usersRepository;
 
@@ -19,8 +18,7 @@ public class UserService {
 		this.usersRepository = usersRepository;
 	}
 
-	@Transactional
-	public UserResponseDTO createUser(UserRequestDTO userRequestDTO) {
+	@Transactional public UserResponseDTO createUser(UserRequestDTO userRequestDTO) {
 		if (userRequestDTO == null) {
 			throw new IllegalArgumentException("User data cannot be null");
 		}
@@ -66,13 +64,12 @@ public class UserService {
 		}
 
 		return usersRepository.findById(userId)
-							  .map(this::mapToResponseDTO)
-							  .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+		                      .map(this::mapToResponseDTO)
+		                      .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
 	}
 
 
-	@Transactional
-	public UserResponseDTO updateUser(Long userId, UserRequestDTO userRequestDTO) {
+	@Transactional public UserResponseDTO updateUser(Long userId, UserRequestDTO userRequestDTO) {
 		if (userId == null) {
 			throw new IllegalArgumentException("User ID cannot be null");
 		}
@@ -82,7 +79,8 @@ public class UserService {
 		}
 
 		Users existingUser = usersRepository.findById(userId)
-											.orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+		                                    .orElseThrow(() -> new RuntimeException(
+			                                    "User not found with id: " + userId));
 
 		// Update user properties if provided
 		if (userRequestDTO.name() != null && !userRequestDTO.name().trim().isEmpty()) {
@@ -107,8 +105,7 @@ public class UserService {
 		return mapToResponseDTO(updatedUser);
 	}
 
-	@Transactional
-	public void deleteUser(Long userId) {
+	@Transactional public void deleteUser(Long userId) {
 		if (userId == null) {
 			throw new IllegalArgumentException("User ID cannot be null");
 		}
@@ -128,10 +125,10 @@ public class UserService {
 
 	private UserResponseDTO mapToResponseDTO(Users user) {
 		return new UserResponseDTO(user.getUserId(),
-								   user.getName(),
-								   user.getEmail(),
-								   user.getPhoneNumber(),
-								   user.getCreatedAt(),
-								   user.getUpdatedAt());
+		                           user.getName(),
+		                           user.getEmail(),
+		                           user.getPhoneNumber(),
+		                           user.getCreatedAt(),
+		                           user.getUpdatedAt());
 	}
 }

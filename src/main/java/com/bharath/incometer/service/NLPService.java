@@ -23,41 +23,41 @@ public class NLPService {
 	private final PaymentMethodFormatter paymentMethodFormatter;
 
 	public NLPService(GeminiExtractionService geminiExtractionService,
-					  CategoryMatchingFuzzy categoryMatchingFuzzy,
-					  PaymentMethodFormatter paymentMethodFormatter) {
+	                  CategoryMatchingFuzzy categoryMatchingFuzzy,
+	                  PaymentMethodFormatter paymentMethodFormatter) {
 		this.geminiExtractionService = geminiExtractionService;
 		this.categoryMatchingFuzzy = categoryMatchingFuzzy;
 		this.paymentMethodFormatter = paymentMethodFormatter;
 	}
 
 	public String handlePendingCategory(Users user,
-										String body,
-										Map<String, PendingCategory> pendingMap,
-										ExpenseService expenseService,
-										CategoryService categoryService) {
+	                                    String body,
+	                                    Map<String, PendingCategory> pendingMap,
+	                                    ExpenseService expenseService,
+	                                    CategoryService categoryService) {
 
 		PendingCategory pending = pendingMap.get(user.getPhoneNumber());
 		if (body.equalsIgnoreCase("yes")) {
 			ExpenseRequestDTO dto = new ExpenseRequestDTO(pending.userId,
-														  categoryService.getCategoryIdByName(pending.suggestedCategory,
-																							  pending.userId),
-														  pending.amount,
-														  "Added via WhatsApp",
-														  paymentMethodFormatter.normalizeForDb(pending.paymentMethod),
-														  pending.expenseDate);
+			                                              categoryService.getCategoryIdByName(pending.suggestedCategory,
+			                                                                                  pending.userId),
+			                                              pending.amount,
+			                                              "Added via WhatsApp",
+			                                              paymentMethodFormatter.normalizeForDb(pending.paymentMethod),
+			                                              pending.expenseDate);
 			expenseService.createExpense(dto);
 			pendingMap.remove(user.getPhoneNumber());
 			return "✅ Recorded ₹" + pending.amount + " for " + pending.suggestedCategory;
 		} else if (body.equalsIgnoreCase("no")) {
 			Long categoryId = categoryService.createCategoryForUser(pending.suggestedCategory,
-																	pending.userId,
-																	pending.type);
+			                                                        pending.userId,
+			                                                        pending.type);
 			ExpenseRequestDTO dto = new ExpenseRequestDTO(pending.userId,
-														  categoryId,
-														  pending.amount,
-														  "Added via WhatsApp",
-														  paymentMethodFormatter.normalizeForDb(pending.paymentMethod),
-														  pending.expenseDate);
+			                                              categoryId,
+			                                              pending.amount,
+			                                              "Added via WhatsApp",
+			                                              paymentMethodFormatter.normalizeForDb(pending.paymentMethod),
+			                                              pending.expenseDate);
 			expenseService.createExpense(dto);
 			pendingMap.remove(user.getPhoneNumber());
 			return "✅ Created new category and recorded ₹" + pending.amount + " for " + pending.suggestedCategory;
@@ -67,10 +67,10 @@ public class NLPService {
 	}
 
 	public String handleExpense(Users user,
-								String body,
-								Map<String, PendingCategory> pendingMap,
-								ExpenseService expenseService,
-								CategoryService categoryService) {
+	                            String body,
+	                            Map<String, PendingCategory> pendingMap,
+	                            ExpenseService expenseService,
+	                            CategoryService categoryService) {
 
 		TransactionExtractionResult result = geminiExtractionService.extractTransaction(body, TransactionType.EXPENSE);
 
@@ -81,19 +81,20 @@ public class NLPService {
 		Long categoryId = categoryService.getCategoryIdByName(result.categoryName(), user.getUserId());
 		if (categoryId != null) {
 			ExpenseRequestDTO dto = new ExpenseRequestDTO(user.getUserId(),
-														  categoryId,
-														  result.amount(),
-														  "Added via WhatsApp",
-														  paymentMethodFormatter.normalizeForDb(result.paymentMethod()),
-														  result.date());
+			                                              categoryId,
+			                                              result.amount(),
+			                                              "Added via WhatsApp",
+			                                              paymentMethodFormatter.normalizeForDb(result.paymentMethod()),
+			                                              result.date());
 			expenseService.createExpense(dto);
-			return "✅ Recorded ₹" + result.amount() + " for " + result.categoryName() + " using " + paymentMethodFormatter.toTitleCase(
-					result.paymentMethod()) + " on " + result.date();
+			return "✅ Recorded ₹" + result.amount() + " for " + result.categoryName() + " using " +
+			       paymentMethodFormatter.toTitleCase(
+				       result.paymentMethod()) + " on " + result.date();
 		}
 
 		// Fuzzy match
 		List<String> existingCategories = categoryService.getAllCategoryNamesForUserByType(user.getUserId(),
-																						   TransactionType.EXPENSE);
+		                                                                                   TransactionType.EXPENSE);
 		String closest = categoryMatchingFuzzy.findClosestCategory(result.categoryName(), existingCategories);
 
 		if (closest != null) {
@@ -110,26 +111,28 @@ public class NLPService {
 
 		// Create new
 		Long newCategoryId = categoryService.createCategoryForUser(result.categoryName(),
-																   user.getUserId(),
-																   TransactionType.EXPENSE);
+		                                                           user.getUserId(),
+		                                                           TransactionType.EXPENSE);
 		ExpenseRequestDTO dto = new ExpenseRequestDTO(user.getUserId(),
-													  newCategoryId,
-													  result.amount(),
-													  "Added via WhatsApp",
-													  paymentMethodFormatter.normalizeForDb(result.paymentMethod()),
-													  result.date());
+		                                              newCategoryId,
+		                                              result.amount(),
+		                                              "Added via WhatsApp",
+		                                              paymentMethodFormatter.normalizeForDb(result.paymentMethod()),
+		                                              result.date());
 		expenseService.createExpense(dto);
-		String message = "✅ Created new category and recorded ₹" + result.amount() + " for " + result.categoryName() + " using " + paymentMethodFormatter.toTitleCase(
+		String message =
+			"✅ Created new category and recorded ₹" + result.amount() + " for " + result.categoryName() + " using " +
+			paymentMethodFormatter.toTitleCase(
 				result.paymentMethod()) + " on " + result.date();
 		logger.info("Returning message: {}", message);
 		return message;
 	}
 
 	public String handleIncome(Users user,
-							   String body,
-							   Map<String, PendingCategory> pendingMap,
-							   ExpenseService expenseService,
-							   CategoryService categoryService) {
+	                           String body,
+	                           Map<String, PendingCategory> pendingMap,
+	                           ExpenseService expenseService,
+	                           CategoryService categoryService) {
 
 		TransactionExtractionResult result = geminiExtractionService.extractTransaction(body, TransactionType.INCOME);
 
@@ -140,18 +143,19 @@ public class NLPService {
 		Long categoryId = categoryService.getCategoryIdByName(result.categoryName(), user.getUserId());
 		if (categoryId != null) {
 			ExpenseRequestDTO dto = new ExpenseRequestDTO(user.getUserId(),
-														  categoryId,
-														  result.amount(),
-														  "Added via WhatsApp",
-														  paymentMethodFormatter.normalizeForDb(result.paymentMethod()),
-														  result.date());
+			                                              categoryId,
+			                                              result.amount(),
+			                                              "Added via WhatsApp",
+			                                              paymentMethodFormatter.normalizeForDb(result.paymentMethod()),
+			                                              result.date());
 			expenseService.createExpense(dto);
-			return "✅ Recorded ₹" + result.amount() + " income for " + result.categoryName() + " in " + paymentMethodFormatter.toTitleCase(
-					result.paymentMethod()) + " on " + result.date();
+			return "✅ Recorded ₹" + result.amount() + " income for " + result.categoryName() + " in " +
+			       paymentMethodFormatter.toTitleCase(
+				       result.paymentMethod()) + " on " + result.date();
 		}
 
 		List<String> existingCategories = categoryService.getAllCategoryNamesForUserByType(user.getUserId(),
-																						   TransactionType.INCOME);
+		                                                                                   TransactionType.INCOME);
 		String closest = categoryMatchingFuzzy.findClosestCategory(result.categoryName(), existingCategories);
 
 		if (closest != null) {
@@ -167,17 +171,18 @@ public class NLPService {
 		}
 
 		Long newCategoryId = categoryService.createCategoryForUser(result.categoryName(),
-																   user.getUserId(),
-																   TransactionType.INCOME);
+		                                                           user.getUserId(),
+		                                                           TransactionType.INCOME);
 		ExpenseRequestDTO dto = new ExpenseRequestDTO(user.getUserId(),
-													  newCategoryId,
-													  result.amount(),
-													  "Added via WhatsApp",
-													  paymentMethodFormatter.normalizeForDb(result.paymentMethod()),
-													  result.date());
+		                                              newCategoryId,
+		                                              result.amount(),
+		                                              "Added via WhatsApp",
+		                                              paymentMethodFormatter.normalizeForDb(result.paymentMethod()),
+		                                              result.date());
 		expenseService.createExpense(dto);
-		return "✅ Created new category and recorded ₹" + result.amount() + " income for " + result.categoryName() + " in " + paymentMethodFormatter.toTitleCase(
-				result.paymentMethod()) + " on " + result.date();
+		return "✅ Created new category and recorded ₹" + result.amount() + " income for " + result.categoryName() +
+		       " in " + paymentMethodFormatter.toTitleCase(
+			result.paymentMethod()) + " on " + result.date();
 	}
 
 }

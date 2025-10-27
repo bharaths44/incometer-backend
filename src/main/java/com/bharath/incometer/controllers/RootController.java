@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class RootController {
 
-    @GetMapping("/")
-    public String hello() {
-        return "Welcome to Expense Tracker Application";
-    }
+	@GetMapping("/")
+	public String hello() {
+		return "Welcome to Expense Tracker Application";
+	}
 }

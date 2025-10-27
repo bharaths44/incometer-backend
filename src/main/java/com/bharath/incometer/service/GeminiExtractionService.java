@@ -24,7 +24,7 @@ public class GeminiExtractionService {
 		String apiKey = System.getenv("GEMINI_API_KEY");
 		if (apiKey == null || apiKey.isBlank()) {
 			throw new IllegalStateException(
-					"GEMINI_API_KEY environment variable is not set. Set it in `.env` or your environment.");
+				"GEMINI_API_KEY environment variable is not set. Set it in `.env` or your environment.");
 		}
 		this.geminiClient = Client.builder().apiKey(apiKey).build();
 		this.objectMapper = new ObjectMapper();
@@ -35,11 +35,19 @@ public class GeminiExtractionService {
 	 */
 	public TransactionExtractionResult extractTransaction(String body, TransactionType type) {
 		try {
-			String prompt = "Extract structured expense/income information from the following text:\n" + "Text: \"" + body + "\"\n" + "Return JSON with fields: amount (number), category (string), payment_method (string), date (YYYY-MM-DD). " + "For the date field, ALWAYS return in YYYY-MM-DD format. Convert relative dates like 'today', 'yesterday', 'tomorrow' to actual dates. " + "Today's date is " + LocalDate.now() + ". " + "If a field cannot be determined, leave it null. " + "Transaction type: " + type.name();
+			String prompt =
+				"Extract structured expense/income information from the following text:\n" + "Text: \"" + body +
+				"\"\n" +
+				"Return JSON with fields: amount (number), category (string), payment_method (string), date " +
+				"(YYYY-MM-DD). " +
+				"For the date field, ALWAYS return in YYYY-MM-DD format. Convert relative dates like 'today', " +
+				"'yesterday', 'tomorrow' to actual dates. " +
+				"Today's date is " + LocalDate.now() + ". " + "If a field cannot be determined, leave it null. " +
+				"Transaction type: " + type.name();
 
 			GenerateContentResponse response = geminiClient.models.generateContent("gemini-2.0-flash",
-																				   prompt,
-																				   null);
+			                                                                       prompt,
+			                                                                       null);
 			String json = response.text();
 			logger.info("Gemini response: {}", json);
 
@@ -61,8 +69,8 @@ public class GeminiExtractionService {
 			logger.info("Amount: {}", amount);
 			String category = map.getOrDefault("category", "").toString();
 			String paymentMethod = map.getOrDefault("payment_method",
-													type == TransactionType.EXPENSE ? "Cash" : "Bank Account")
-									  .toString();
+			                                        type == TransactionType.EXPENSE ? "Cash" : "Bank Account")
+			                          .toString();
 			LocalDate date = parseDate(map.get("date"));
 
 			return new TransactionExtractionResult(amount, category, paymentMethod, date);
@@ -70,9 +78,9 @@ public class GeminiExtractionService {
 		} catch (Exception e) {
 			logger.error("Error in Gemini extraction", e);
 			return new TransactionExtractionResult(null,
-												   type == TransactionType.EXPENSE ? "Miscellaneous" : "Bank Account",
-												   type == TransactionType.EXPENSE ? "Cash" : "Bank Account",
-												   LocalDate.now());
+			                                       type == TransactionType.EXPENSE ? "Miscellaneous" : "Bank Account",
+			                                       type == TransactionType.EXPENSE ? "Cash" : "Bank Account",
+			                                       LocalDate.now());
 		}
 	}
 

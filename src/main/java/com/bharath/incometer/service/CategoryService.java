@@ -21,28 +21,29 @@ public class CategoryService {
 	private final UsersRepository usersRepository;
 
 	public CategoryService(ExpenseRepository expenseRepository,
-						   CategoryRepository categoryRepository,
-						   UsersRepository usersRepository) {
+	                       CategoryRepository categoryRepository,
+	                       UsersRepository usersRepository) {
 		this.expenseRepository = expenseRepository;
 		this.categoryRepository = categoryRepository;
 		this.usersRepository = usersRepository;
 	}
 
 	private CategoryResponseDTO toDTO(Category category) {
-		return new CategoryResponseDTO(
-				category.getCategoryId(),
-				category.getUser().getUserId(),
-				category.getName(),
-				category.getType(),
-				category.getCreatedAt()
-		);
+		return new CategoryResponseDTO(category.getCategoryId(),
+		                               category.getUser().getUserId(),
+		                               category.getName(),
+		                               category.getIcon(),
+		                               category.getType(),
+		                               category.getCreatedAt());
 	}
 
 	private Category toEntity(CategoryRequestDTO categoryRequestDTO) {
 		Category category = new Category();
-		category.setUser(usersRepository.findById(categoryRequestDTO.userId())
-										.orElseThrow(() -> new RuntimeException("User not found with id: " + categoryRequestDTO.userId())));
+		category.setUser(usersRepository.findById(categoryRequestDTO.userId()).orElseThrow(()
+			                                                                                   -> new RuntimeException(
+			"User not found with id: " + categoryRequestDTO.userId())));
 		category.setName(categoryRequestDTO.name());
+		category.setIcon(categoryRequestDTO.icon());
 		category.setType(categoryRequestDTO.type());
 		return category;
 	}
@@ -55,8 +56,7 @@ public class CategoryService {
 		}
 
 		// Check if category already exists for this user
-		boolean exists = categoryRepository.existsByUserUserIdAndNameAndType(
-				dto.userId(), dto.name(), dto.type());
+		boolean exists = categoryRepository.existsByUserUserIdAndNameAndType(dto.userId(), dto.name(), dto.type());
 		if (exists) {
 			throw new RuntimeException("Category already exists for this user");
 		}
@@ -73,8 +73,8 @@ public class CategoryService {
 		}
 
 		Category existingCategory = categoryRepository.findById(id)
-													  .orElseThrow(() -> new RuntimeException(
-															  "Category not found with id: " + id));
+		                                              .orElseThrow(() -> new RuntimeException(
+			                                              "Category not found with id: " + id));
 
 		// Validate that user owns this category
 		if (!existingCategory.getUser().getUserId().equals(dto.userId())) {
@@ -82,6 +82,7 @@ public class CategoryService {
 		}
 
 		existingCategory.setName(dto.name());
+		existingCategory.setIcon(dto.icon());
 		existingCategory.setType(dto.type());
 		Category updatedCategory = categoryRepository.save(existingCategory);
 		return toDTO(updatedCategory);
@@ -97,8 +98,8 @@ public class CategoryService {
 		}
 
 		Category existingCategory = categoryRepository.findById(id)
-													  .orElseThrow(() -> new RuntimeException(
-															  "Category not found with id: " + id));
+		                                              .orElseThrow(() -> new RuntimeException(
+			                                              "Category not found with id: " + id));
 
 		// Validate that user owns this category
 		if (!existingCategory.getUser().getUserId().equals(userId)) {
@@ -117,16 +118,14 @@ public class CategoryService {
 	@Transactional(readOnly = true)
 	public CategoryResponseDTO getCategoryById(Long id) {
 		Category category = categoryRepository.findById(id)
-											  .orElseThrow(() -> new RuntimeException("Category not found with id: " + id));
+		                                      .orElseThrow(() -> new RuntimeException(
+			                                      "Category not found with id: " + id));
 		return toDTO(category);
 	}
 
 	@Transactional(readOnly = true)
 	public List<CategoryResponseDTO> getAllCategories() {
-		return categoryRepository.findAll()
-								 .stream()
-								 .map(this::toDTO)
-								 .collect(Collectors.toList());
+		return categoryRepository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
 	}
 
 	@Transactional(readOnly = true)
@@ -135,10 +134,7 @@ public class CategoryService {
 			throw new IllegalArgumentException("User ID cannot be null");
 		}
 
-		return categoryRepository.findByUserUserId(userId)
-								 .stream()
-								 .map(this::toDTO)
-								 .collect(Collectors.toList());
+		return categoryRepository.findByUserUserId(userId).stream().map(this::toDTO).collect(Collectors.toList());
 	}
 
 	public Long getCategoryIdByName(String categoryName, Long userId) {
@@ -149,27 +145,23 @@ public class CategoryService {
 	public List<String> getAllCategoryNamesForUser(Long userId) {
 		// Get user categories
 		List<Category> userCategories = categoryRepository.findByUserUserId(userId);
-		return userCategories.stream()
-							 .map(Category::getName)
-							 .collect(Collectors.toList());
+		return userCategories.stream().map(Category::getName).collect(Collectors.toList());
 	}
 
 	public List<String> getAllCategoryNamesForUserByType(Long userId, TransactionType type) {
 		// Get user categories by type
 		List<Category> userCategories = categoryRepository.findByUserUserIdAndType(userId, type);
-		return userCategories.stream()
-							 .map(Category::getName)
-							 .collect(Collectors.toList());
+		return userCategories.stream().map(Category::getName).collect(Collectors.toList());
 	}
 
 	@Transactional
 	public Long createCategoryForUser(String categoryName, Long userId, TransactionType type) {
 		Category category = new Category();
 		category.setName(capitalize(categoryName));
+		category.setIcon("circle"); // Default icon
 		category.setType(type);
 		// Set user
-		category.setUser(usersRepository.findById(userId)
-										.orElseThrow(() -> new RuntimeException("User not found")));
+		category.setUser(usersRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found")));
 		Category saved = categoryRepository.save(category);
 		return saved.getCategoryId();
 	}

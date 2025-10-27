@@ -26,9 +26,9 @@ public class RegistrationService {
 
 		try {
 			UserRequestDTO dto = new UserRequestDTO(name.trim(),
-													phoneNumber + "@whatsapp.local",
-													phoneNumber,
-													"whatsapp");
+			                                        phoneNumber + "@whatsapp.local",
+			                                        phoneNumber,
+			                                        "whatsapp");
 			userService.createUser(dto);
 			return "✅ Registered successfully! You can now add expenses.";
 		} catch (Exception e) {

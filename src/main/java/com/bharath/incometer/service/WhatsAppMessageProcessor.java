@@ -4,16 +4,15 @@ import com.bharath.incometer.entities.Users;
 import com.bharath.incometer.repository.UsersRepository;
 import org.springframework.stereotype.Service;
 
-@Service
-public class WhatsAppMessageProcessor {
+@Service public class WhatsAppMessageProcessor {
 
 	private final UsersRepository usersRepository;
 	private final RegistrationService registrationService;
 	private final TransactionMessageHandler transactionHandler;
 
 	public WhatsAppMessageProcessor(UsersRepository usersRepository,
-									RegistrationService registrationService,
-									TransactionMessageHandler transactionHandler) {
+	                                RegistrationService registrationService,
+	                                TransactionMessageHandler transactionHandler) {
 		this.usersRepository = usersRepository;
 		this.registrationService = registrationService;
 		this.transactionHandler = transactionHandler;

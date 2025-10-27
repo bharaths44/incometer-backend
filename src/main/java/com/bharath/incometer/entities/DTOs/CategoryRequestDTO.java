@@ -8,5 +8,5 @@ import java.io.Serializable;
 /**
  * DTO for {@link Category}
  */
-public record CategoryRequestDTO(Long userId, String name, TransactionType type) implements Serializable {
+public record CategoryRequestDTO(Long userId, String name, String icon, TransactionType type) implements Serializable {
 }
