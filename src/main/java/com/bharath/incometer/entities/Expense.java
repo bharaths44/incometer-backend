@@ -20,60 +20,60 @@ import java.util.Objects;
 public class Expense {
 
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "expense_id")
-	private Long expenseId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "expense_id")
+    private Long expenseId;
 
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "user_id", nullable = false)
-	@ToString.Exclude
-	private Users user;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    @ToString.Exclude
+    private Users user;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "category_id")
-	@ToString.Exclude
-	private Category category;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    @ToString.Exclude
+    private Category category;
 
-	@Column(nullable = false, precision = 10, scale = 2)
-	private BigDecimal amount;
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal amount;
 
-	@Lob
-	private String description;
-
-
-	@Column(name = "payment_method")
-	private String paymentMethod;
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
 
 
-	@Column(name = "expense_date")
-	private LocalDate expenseDate;
+    @Column(name = "payment_method")
+    private String paymentMethod;
 
-	@CreationTimestamp
-	@Column(name = "created_at", nullable = false, updatable = false)
-	private LocalDateTime createdAt;
 
-	@Override
-	public final boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null) return false;
-		Class<?> oEffectiveClass = o instanceof HibernateProxy
-								   ? ((HibernateProxy) o).getHibernateLazyInitializer()
-														 .getPersistentClass()
-								   : o.getClass();
-		Class<?> thisEffectiveClass = this instanceof HibernateProxy
-									  ? ((HibernateProxy) this).getHibernateLazyInitializer()
-															   .getPersistentClass()
-									  : this.getClass();
-		if (thisEffectiveClass != oEffectiveClass) return false;
-		Expense expense = (Expense) o;
-		return getExpenseId() != null && Objects.equals(getExpenseId(), expense.getExpenseId());
-	}
+    @Column(name = "expense_date")
+    private LocalDate expenseDate;
 
-	@Override
-	public final int hashCode() {
-		return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
-																	   .getPersistentClass()
-																	   .hashCode() : getClass().hashCode();
-	}
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null) return false;
+        Class<?> oEffectiveClass = o instanceof HibernateProxy
+                ? ((HibernateProxy) o).getHibernateLazyInitializer()
+                .getPersistentClass()
+                : o.getClass();
+        Class<?> thisEffectiveClass = this instanceof HibernateProxy
+                ? ((HibernateProxy) this).getHibernateLazyInitializer()
+                .getPersistentClass()
+                : this.getClass();
+        if (thisEffectiveClass != oEffectiveClass) return false;
+        Expense expense = (Expense) o;
+        return getExpenseId() != null && Objects.equals(getExpenseId(), expense.getExpenseId());
+    }
+
+    @Override
+    public final int hashCode() {
+        return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
+                .getPersistentClass()
+                .hashCode() : getClass().hashCode();
+    }
 }
