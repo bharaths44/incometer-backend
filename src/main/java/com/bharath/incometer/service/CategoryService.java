@@ -3,7 +3,7 @@ package com.bharath.incometer.service;
 import com.bharath.incometer.entities.Category;
 import com.bharath.incometer.entities.DTOs.CategoryRequestDTO;
 import com.bharath.incometer.entities.DTOs.CategoryResponseDTO;
-import com.bharath.incometer.entities.TransactionType;
+import com.bharath.incometer.enums.TransactionType;
 import com.bharath.incometer.repository.CategoryRepository;
 import com.bharath.incometer.repository.ExpenseRepository;
 import com.bharath.incometer.repository.UsersRepository;

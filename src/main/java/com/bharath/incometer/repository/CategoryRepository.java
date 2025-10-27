@@ -1,7 +1,7 @@
 package com.bharath.incometer.repository;
 
 import com.bharath.incometer.entities.Category;
-import com.bharath.incometer.entities.TransactionType;
+import com.bharath.incometer.enums.TransactionType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

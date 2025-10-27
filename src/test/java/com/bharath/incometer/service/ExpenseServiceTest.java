@@ -4,7 +4,7 @@ import com.bharath.incometer.entities.Category;
 import com.bharath.incometer.entities.DTOs.ExpenseRequestDTO;
 import com.bharath.incometer.entities.DTOs.ExpenseResponseDTO;
 import com.bharath.incometer.entities.Expense;
-import com.bharath.incometer.entities.TransactionType;
+import com.bharath.incometer.enums.TransactionType;
 import com.bharath.incometer.entities.Users;
 import com.bharath.incometer.repository.CategoryRepository;
 import com.bharath.incometer.repository.ExpenseRepository;
@@ -73,24 +73,24 @@ public class ExpenseServiceTest {
 	@Test
 	void testCreateExpense() {
 		ExpenseRequestDTO request = new ExpenseRequestDTO(1L,
-														  1L,
-														  BigDecimal.valueOf(50.00),
-														  "Lunch",
-														  "Cash",
-														  LocalDate.now());
+		                                                  1L,
+		                                                  BigDecimal.valueOf(50.00),
+		                                                  "Lunch",
+		                                                  "Cash",
+		                                                  LocalDate.now());
 		when(usersRepository.findById(1L)).thenReturn(Optional.of(user));
 		when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
 		when(expenseRepository.save(any(Expense.class))).thenReturn(expense);
 
 		System.out.println("Input: " + request);
 		ExpenseResponseDTO expected = new ExpenseResponseDTO(1L,
-															 1L,
-															 1L,
-															 BigDecimal.valueOf(50.00),
-															 "Lunch",
-															 "Cash",
-															 LocalDate.now(),
-															 expense.getCreatedAt());
+		                                                     1L,
+		                                                     1L,
+		                                                     BigDecimal.valueOf(50.00),
+		                                                     "Lunch",
+		                                                     "Cash",
+		                                                     LocalDate.now(),
+		                                                     expense.getCreatedAt());
 		System.out.println("Expected: " + expected);
 
 		ExpenseResponseDTO result = expenseService.createExpense(request);
@@ -107,13 +107,13 @@ public class ExpenseServiceTest {
 
 		System.out.println("Input: userId=1L");
 		List<ExpenseResponseDTO> expected = List.of(new ExpenseResponseDTO(1L,
-																		   1L,
-																		   1L,
-																		   BigDecimal.valueOf(50.00),
-																		   "Lunch",
-																		   "Cash",
-																		   LocalDate.now(),
-																		   expense.getCreatedAt()));
+		                                                                   1L,
+		                                                                   1L,
+		                                                                   BigDecimal.valueOf(50.00),
+		                                                                   "Lunch",
+		                                                                   "Cash",
+		                                                                   LocalDate.now(),
+		                                                                   expense.getCreatedAt()));
 		System.out.println("Expected: " + expected);
 
 		List<ExpenseResponseDTO> result = expenseService.getExpensesByUserId(1L);

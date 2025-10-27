@@ -1,6 +1,6 @@
 package com.bharath.incometer.service;
 
-import com.bharath.incometer.entities.TransactionType;
+import com.bharath.incometer.enums.TransactionType;
 import com.bharath.incometer.utils.TransactionExtractionResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.genai.Client;

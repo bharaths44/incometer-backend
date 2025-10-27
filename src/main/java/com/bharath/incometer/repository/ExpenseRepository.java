@@ -32,4 +32,15 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 		@Param("userId") Long userId,
 		@Param("startDate") LocalDate startDate,
 		@Param("endDate") LocalDate endDate);
+
+	@Query(
+		"SELECT SUM(e.amount) FROM Expense e WHERE e.user.userId = :userId " +
+		"AND e.category.categoryId = :categoryId " +
+		"AND e.expenseDate BETWEEN :startDate AND :endDate"
+	)
+	BigDecimal sumAmountByUserIdAndCategoryIdAndDateRange(
+		@Param("userId") Long userId,
+		@Param("categoryId") Long categoryId,
+		@Param("startDate") LocalDate startDate,
+		@Param("endDate") LocalDate endDate);
 }
