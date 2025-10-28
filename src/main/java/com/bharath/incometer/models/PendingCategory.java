@@ -9,7 +9,7 @@ public class PendingCategory {
 	public Long userId;
 	public BigDecimal amount;
 	public String suggestedCategory;
-	public String paymentMethod;
+	public Long paymentMethodId;
 	public LocalDate expenseDate;
 	public TransactionType type;
 }

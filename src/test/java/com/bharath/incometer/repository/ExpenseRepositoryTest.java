@@ -2,8 +2,10 @@ package com.bharath.incometer.repository;
 
 import com.bharath.incometer.entities.Category;
 import com.bharath.incometer.entities.Expense;
-import com.bharath.incometer.enums.TransactionType;
+import com.bharath.incometer.entities.PaymentMethod;
 import com.bharath.incometer.entities.Users;
+import com.bharath.incometer.enums.PaymentType;
+import com.bharath.incometer.enums.TransactionType;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,6 +34,9 @@ public class ExpenseRepositoryTest {
 	@Autowired
 	private UsersRepository usersRepository;
 
+	@Autowired
+	private PaymentMethodRepository paymentMethodRepository;
+
 	private Users user;
 	private Category category;
 
@@ -59,12 +64,20 @@ public class ExpenseRepositoryTest {
 	}
 
 	private void createExpense(Users user, Category category, BigDecimal amount, String description) {
+		PaymentMethod pm = new PaymentMethod();
+		pm.setName("Cash");
+		pm.setType(PaymentType.CASH);
+		pm.setDisplayName("Cash");
+		pm.setIcon("cash");
+		pm.setUser(user);
+		pm = paymentMethodRepository.save(pm);
+
 		Expense e = new Expense();
 		e.setUser(user);
 		e.setCategory(category);
 		e.setAmount(amount);
 		e.setDescription(description);
-		e.setPaymentMethod("Cash");
+		e.setPaymentMethod(pm);
 		e.setExpenseDate(LocalDate.now());
 		expenseRepository.save(e);
 	}

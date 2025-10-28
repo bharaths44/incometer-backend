@@ -1,9 +1,9 @@
 package com.bharath.incometer.service;
 
 import com.bharath.incometer.entities.DTOs.ExpenseRequestDTO;
-import com.bharath.incometer.models.PendingCategory;
-import com.bharath.incometer.enums.TransactionType;
 import com.bharath.incometer.entities.Users;
+import com.bharath.incometer.enums.TransactionType;
+import com.bharath.incometer.models.PendingCategory;
 import com.bharath.incometer.utils.CategoryMatchingFuzzy;
 import com.bharath.incometer.utils.PaymentMethodFormatter;
 import com.bharath.incometer.utils.TransactionExtractionResult;
@@ -21,13 +21,16 @@ public class NLPService {
 	private final GeminiExtractionService geminiExtractionService;
 	private final CategoryMatchingFuzzy categoryMatchingFuzzy;
 	private final PaymentMethodFormatter paymentMethodFormatter;
+	private final PaymentMethodService paymentMethodService;
 
 	public NLPService(GeminiExtractionService geminiExtractionService,
 	                  CategoryMatchingFuzzy categoryMatchingFuzzy,
-	                  PaymentMethodFormatter paymentMethodFormatter) {
+	                  PaymentMethodFormatter paymentMethodFormatter,
+	                  PaymentMethodService paymentMethodService) {
 		this.geminiExtractionService = geminiExtractionService;
 		this.categoryMatchingFuzzy = categoryMatchingFuzzy;
 		this.paymentMethodFormatter = paymentMethodFormatter;
+		this.paymentMethodService = paymentMethodService;
 	}
 
 	public String handlePendingCategory(Users user,
@@ -43,7 +46,7 @@ public class NLPService {
 			                                                                                  pending.userId),
 			                                              pending.amount,
 			                                              "Added via WhatsApp",
-			                                              paymentMethodFormatter.normalizeForDb(pending.paymentMethod),
+			                                              pending.paymentMethodId,
 			                                              pending.expenseDate);
 			expenseService.createExpense(dto);
 			pendingMap.remove(user.getPhoneNumber());
@@ -56,7 +59,7 @@ public class NLPService {
 			                                              categoryId,
 			                                              pending.amount,
 			                                              "Added via WhatsApp",
-			                                              paymentMethodFormatter.normalizeForDb(pending.paymentMethod),
+			                                              pending.paymentMethodId,
 			                                              pending.expenseDate);
 			expenseService.createExpense(dto);
 			pendingMap.remove(user.getPhoneNumber());
@@ -80,11 +83,13 @@ public class NLPService {
 
 		Long categoryId = categoryService.getCategoryIdByName(result.categoryName(), user.getUserId());
 		if (categoryId != null) {
+			Long paymentMethodId = paymentMethodService.findOrCreateByName(user.getUserId(), result.paymentMethod())
+			                                           .getPaymentMethodId();
 			ExpenseRequestDTO dto = new ExpenseRequestDTO(user.getUserId(),
 			                                              categoryId,
 			                                              result.amount(),
 			                                              "Added via WhatsApp",
-			                                              paymentMethodFormatter.normalizeForDb(result.paymentMethod()),
+			                                              paymentMethodId,
 			                                              result.date());
 			expenseService.createExpense(dto);
 			return "✅ Recorded ₹" + result.amount() + " for " + result.categoryName() + " using " +
@@ -102,7 +107,8 @@ public class NLPService {
 			pending.userId = user.getUserId();
 			pending.amount = result.amount();
 			pending.suggestedCategory = closest;
-			pending.paymentMethod = paymentMethodFormatter.normalizeForDb(result.paymentMethod());
+			pending.paymentMethodId = paymentMethodService.findOrCreateByName(user.getUserId(), result.paymentMethod())
+			                                              .getPaymentMethodId();
 			pending.expenseDate = result.date();
 			pending.type = TransactionType.EXPENSE;
 			pendingMap.put(user.getPhoneNumber(), pending);
@@ -113,11 +119,13 @@ public class NLPService {
 		Long newCategoryId = categoryService.createCategoryForUser(result.categoryName(),
 		                                                           user.getUserId(),
 		                                                           TransactionType.EXPENSE);
+		Long paymentMethodId2 = paymentMethodService.findOrCreateByName(user.getUserId(), result.paymentMethod())
+		                                            .getPaymentMethodId();
 		ExpenseRequestDTO dto = new ExpenseRequestDTO(user.getUserId(),
 		                                              newCategoryId,
 		                                              result.amount(),
 		                                              "Added via WhatsApp",
-		                                              paymentMethodFormatter.normalizeForDb(result.paymentMethod()),
+		                                              paymentMethodId2,
 		                                              result.date());
 		expenseService.createExpense(dto);
 		String message =
@@ -142,11 +150,13 @@ public class NLPService {
 
 		Long categoryId = categoryService.getCategoryIdByName(result.categoryName(), user.getUserId());
 		if (categoryId != null) {
+			Long paymentMethodId = paymentMethodService.findOrCreateByName(user.getUserId(), result.paymentMethod())
+			                                           .getPaymentMethodId();
 			ExpenseRequestDTO dto = new ExpenseRequestDTO(user.getUserId(),
 			                                              categoryId,
 			                                              result.amount(),
 			                                              "Added via WhatsApp",
-			                                              paymentMethodFormatter.normalizeForDb(result.paymentMethod()),
+			                                              paymentMethodId,
 			                                              result.date());
 			expenseService.createExpense(dto);
 			return "✅ Recorded ₹" + result.amount() + " income for " + result.categoryName() + " in " +
@@ -163,7 +173,8 @@ public class NLPService {
 			pending.userId = user.getUserId();
 			pending.amount = result.amount();
 			pending.suggestedCategory = closest;
-			pending.paymentMethod = paymentMethodFormatter.normalizeForDb(result.paymentMethod());
+			pending.paymentMethodId = paymentMethodService.findOrCreateByName(user.getUserId(), result.paymentMethod())
+			                                              .getPaymentMethodId();
 			pending.expenseDate = result.date();
 			pending.type = TransactionType.INCOME;
 			pendingMap.put(user.getPhoneNumber(), pending);
@@ -173,11 +184,13 @@ public class NLPService {
 		Long newCategoryId = categoryService.createCategoryForUser(result.categoryName(),
 		                                                           user.getUserId(),
 		                                                           TransactionType.INCOME);
+		Long paymentMethodId2 = paymentMethodService.findOrCreateByName(user.getUserId(), result.paymentMethod())
+		                                            .getPaymentMethodId();
 		ExpenseRequestDTO dto = new ExpenseRequestDTO(user.getUserId(),
 		                                              newCategoryId,
 		                                              result.amount(),
 		                                              "Added via WhatsApp",
-		                                              paymentMethodFormatter.normalizeForDb(result.paymentMethod()),
+		                                              paymentMethodId2,
 		                                              result.date());
 		expenseService.createExpense(dto);
 		return "✅ Created new category and recorded ₹" + result.amount() + " income for " + result.categoryName() +

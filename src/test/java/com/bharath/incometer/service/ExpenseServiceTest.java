@@ -4,10 +4,13 @@ import com.bharath.incometer.entities.Category;
 import com.bharath.incometer.entities.DTOs.ExpenseRequestDTO;
 import com.bharath.incometer.entities.DTOs.ExpenseResponseDTO;
 import com.bharath.incometer.entities.Expense;
+import com.bharath.incometer.entities.PaymentMethod;
 import com.bharath.incometer.entities.Users;
+import com.bharath.incometer.enums.PaymentType;
 import com.bharath.incometer.enums.TransactionType;
 import com.bharath.incometer.repository.CategoryRepository;
 import com.bharath.incometer.repository.ExpenseRepository;
+import com.bharath.incometer.repository.PaymentMethodRepository;
 import com.bharath.incometer.repository.UsersRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,12 +42,16 @@ public class ExpenseServiceTest {
 	@Mock
 	private UsersRepository usersRepository;
 
+	@Mock
+	private PaymentMethodRepository paymentMethodRepository;
+
 	@InjectMocks
 	private ExpenseService expenseService;
 
 	private Users user;
 	private Category category;
 	private Expense expense;
+	private PaymentMethod paymentMethod;
 
 	@BeforeEach
 	void setUp() {
@@ -59,13 +66,19 @@ public class ExpenseServiceTest {
 		category.setName("Food");
 		category.setType(TransactionType.EXPENSE);
 
+		paymentMethod = new PaymentMethod();
+		paymentMethod.setPaymentMethodId(1L);
+		paymentMethod.setName("Cash");
+		paymentMethod.setType(PaymentType.CASH);
+		paymentMethod.setDisplayName("Cash");
+
 		expense = new Expense();
 		expense.setExpenseId(1L);
 		expense.setUser(user);
 		expense.setCategory(category);
 		expense.setAmount(BigDecimal.valueOf(50.00));
 		expense.setDescription("Lunch");
-		expense.setPaymentMethod("Cash");
+		expense.setPaymentMethod(paymentMethod);
 		expense.setExpenseDate(LocalDate.now());
 		expense.setCreatedAt(LocalDateTime.now());
 	}
@@ -76,10 +89,11 @@ public class ExpenseServiceTest {
 		                                                  1L,
 		                                                  BigDecimal.valueOf(50.00),
 		                                                  "Lunch",
-		                                                  "Cash",
+		                                                  1L,
 		                                                  LocalDate.now());
 		when(usersRepository.findById(1L)).thenReturn(Optional.of(user));
 		when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
+		when(paymentMethodRepository.findById(1L)).thenReturn(Optional.of(paymentMethod));
 		when(expenseRepository.save(any(Expense.class))).thenReturn(expense);
 
 		System.out.println("Input: " + request);
@@ -88,7 +102,10 @@ public class ExpenseServiceTest {
 		                                                     new ExpenseResponseDTO.CategoryDto(1L, "Food", null),
 		                                                     BigDecimal.valueOf(50.00),
 		                                                     "Lunch",
-		                                                     "Cash",
+		                                                     new ExpenseResponseDTO.PaymentMethodDto(1L,
+		                                                                                             "Cash",
+		                                                                                             "Cash",
+		                                                                                             "CASH"),
 		                                                     LocalDate.now());
 		System.out.println("Expected: " + expected);
 
@@ -112,7 +129,10 @@ public class ExpenseServiceTest {
 		                                                                                                      null),
 		                                                                   BigDecimal.valueOf(50.00),
 		                                                                   "Lunch",
-		                                                                   "Cash",
+		                                                                   new ExpenseResponseDTO.PaymentMethodDto(1L,
+		                                                                                                           "Cash",
+		                                                                                                           "Cash",
+		                                                                                                           "CASH"),
 		                                                                   LocalDate.now()));
 		System.out.println("Expected: " + expected);
 
