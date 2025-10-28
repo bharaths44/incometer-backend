@@ -23,8 +23,7 @@ public class ExpenseService {
 	private final CategoryRepository categoryRepository;
 	private final UsersRepository usersRepository;
 
-	public ExpenseService(ExpenseRepository expenseRepository,
-	                      CategoryRepository categoryRepository,
+	public ExpenseService(ExpenseRepository expenseRepository, CategoryRepository categoryRepository,
 	                      UsersRepository usersRepository) {
 		this.expenseRepository = expenseRepository;
 		this.categoryRepository = categoryRepository;
@@ -32,16 +31,15 @@ public class ExpenseService {
 	}
 
 	private ExpenseResponseDTO toDTO(Expense expense) {
-		return new ExpenseResponseDTO(
-			expense.getExpenseId(),
-			expense.getUser().getUserId(),
-			expense.getCategory().getCategoryId(),
-			expense.getAmount(),
-			expense.getDescription(),
-			expense.getPaymentMethod(),
-			expense.getExpenseDate(),
-			expense.getCreatedAt()
-		);
+		return new ExpenseResponseDTO(expense.getExpenseId(),
+		                              expense.getUser().getUserId(),
+		                              new ExpenseResponseDTO.CategoryDto(expense.getCategory().getCategoryId(),
+		                                                                 expense.getCategory().getName(),
+		                                                                 expense.getCategory().getIcon()),
+		                              expense.getAmount(),
+		                              expense.getDescription(),
+		                              expense.getPaymentMethod(),
+		                              expense.getExpenseDate());
 	}
 
 	private Expense toEntity(ExpenseRequestDTO expenseRequestDTO) {
@@ -184,28 +182,17 @@ public class ExpenseService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<ExpenseResponseDTO> getAllExpenses() {
-		return expenseRepository.findAll()
-		                        .stream()
-		                        .map(this::toDTO)
-		                        .collect(Collectors.toList());
-	}
-
-	@Transactional(readOnly = true)
 	public List<ExpenseResponseDTO> getExpensesByUserId(Long userId) {
 		if (userId == null) {
 			throw new IllegalArgumentException("User ID cannot be null");
 		}
 
-		return expenseRepository.findByUserUserId(userId)
-		                        .stream()
-		                        .map(this::toDTO)
-		                        .collect(Collectors.toList());
+		return expenseRepository.findByUserUserId(userId).stream().map(this::toDTO).collect(Collectors.toList());
 	}
 
 	@Transactional(readOnly = true)
-	public List<ExpenseResponseDTO> getExpensesByUserIdAndDateRange(
-		Long userId, LocalDate startDate, LocalDate endDate) {
+	public List<ExpenseResponseDTO> getExpensesByUserIdAndDateRange(Long userId, LocalDate startDate,
+	                                                                LocalDate endDate) {
 
 		if (userId == null) {
 			throw new IllegalArgumentException("User ID cannot be null");
@@ -226,18 +213,6 @@ public class ExpenseService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<ExpenseResponseDTO> getExpensesByUserIdAndCategoryId(Long userId, Long categoryId) {
-		if (userId == null || categoryId == null) {
-			throw new IllegalArgumentException("User ID and Category ID cannot be null");
-		}
-
-		return expenseRepository.findByUserUserIdAndCategoryCategoryId(userId, categoryId)
-		                        .stream()
-		                        .map(this::toDTO)
-		                        .collect(Collectors.toList());
-	}
-
-	@Transactional(readOnly = true)
 	public BigDecimal getTotalExpensesByUserId(Long userId) {
 		if (userId == null) {
 			throw new IllegalArgumentException("User ID cannot be null");
@@ -246,18 +221,4 @@ public class ExpenseService {
 		return expenseRepository.sumAmountByUserId(userId);
 	}
 
-	@Transactional(readOnly = true)
-	public BigDecimal getTotalExpensesByUserIdAndDateRange(
-		Long userId, LocalDate startDate, LocalDate endDate) {
-
-		if (userId == null) {
-			throw new IllegalArgumentException("User ID cannot be null");
-		}
-
-		if (startDate == null || endDate == null) {
-			throw new IllegalArgumentException("Start date and end date cannot be null");
-		}
-
-		return expenseRepository.sumAmountByUserIdAndDateRange(userId, startDate, endDate);
-	}
 }
