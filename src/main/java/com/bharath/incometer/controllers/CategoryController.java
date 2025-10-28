@@ -20,7 +20,9 @@ public class CategoryController {
 	}
 
 	@PostMapping
-	public ResponseEntity<CategoryResponseDTO> createCategory(CategoryRequestDTO categoryRequestDTO) {
+	public ResponseEntity<CategoryResponseDTO> createCategory(
+		@RequestBody CategoryRequestDTO categoryRequestDTO) {
+		System.out.println("Received Category Request: " + categoryRequestDTO);
 		try {
 			CategoryResponseDTO response = categoryService.addCategory(categoryRequestDTO);
 			return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -53,8 +55,9 @@ public class CategoryController {
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<CategoryResponseDTO> updateCategory(@PathVariable Long id,
-	                                                          CategoryRequestDTO categoryRequestDTO) {
+	public ResponseEntity<CategoryResponseDTO> updateCategory(
+		@PathVariable Long id,
+		@RequestBody CategoryRequestDTO categoryRequestDTO) {
 		try {
 			CategoryResponseDTO response = categoryService.updateCategory(id, categoryRequestDTO);
 			return ResponseEntity.ok(response);
@@ -71,7 +74,9 @@ public class CategoryController {
 	}
 
 	@DeleteMapping("/{userId}/{id}")
-	public ResponseEntity<String> deleteCategory(@PathVariable Long userId, @PathVariable Long id) {
+	public ResponseEntity<String> deleteCategory(
+		@PathVariable Long userId,
+		@PathVariable Long id) {
 		try {
 			categoryService.deleteCategory(id, userId);
 			return ResponseEntity.ok("Category deleted successfully");
@@ -88,7 +93,8 @@ public class CategoryController {
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<CategoryResponseDTO> getCategory(@PathVariable Long id) {
+	public ResponseEntity<CategoryResponseDTO> getCategory(
+		@PathVariable Long id) {
 		try {
 			CategoryResponseDTO response = categoryService.getCategoryById(id);
 			return ResponseEntity.ok(response);
@@ -105,7 +111,8 @@ public class CategoryController {
 	}
 
 	@GetMapping("/user/{userId}")
-	public ResponseEntity<List<CategoryResponseDTO>> getCategoriesByUserId(@PathVariable Long userId) {
+	public ResponseEntity<List<CategoryResponseDTO>> getCategoriesByUserId(
+		@PathVariable Long userId) {
 		try {
 			return ResponseEntity.ok(categoryService.getCategoriesByUserId(userId));
 		} catch (IllegalArgumentException e) {
