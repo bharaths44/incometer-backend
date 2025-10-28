@@ -4,9 +4,11 @@ import com.bharath.incometer.entities.Category;
 import com.bharath.incometer.entities.DTOs.ExpenseRequestDTO;
 import com.bharath.incometer.entities.DTOs.ExpenseResponseDTO;
 import com.bharath.incometer.entities.Expense;
+import com.bharath.incometer.entities.PaymentMethod;
 import com.bharath.incometer.entities.Users;
 import com.bharath.incometer.repository.CategoryRepository;
 import com.bharath.incometer.repository.ExpenseRepository;
+import com.bharath.incometer.repository.PaymentMethodRepository;
 import com.bharath.incometer.repository.UsersRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,12 +24,14 @@ public class ExpenseService {
 	private final ExpenseRepository expenseRepository;
 	private final CategoryRepository categoryRepository;
 	private final UsersRepository usersRepository;
+	private final PaymentMethodRepository paymentMethodRepository;
 
 	public ExpenseService(ExpenseRepository expenseRepository, CategoryRepository categoryRepository,
-	                      UsersRepository usersRepository) {
+	                      UsersRepository usersRepository, PaymentMethodRepository paymentMethodRepository) {
 		this.expenseRepository = expenseRepository;
 		this.categoryRepository = categoryRepository;
 		this.usersRepository = usersRepository;
+		this.paymentMethodRepository = paymentMethodRepository;
 	}
 
 	private ExpenseResponseDTO toDTO(Expense expense) {
@@ -38,7 +42,14 @@ public class ExpenseService {
 		                                                                 expense.getCategory().getIcon()),
 		                              expense.getAmount(),
 		                              expense.getDescription(),
-		                              expense.getPaymentMethod(),
+		                              new ExpenseResponseDTO.PaymentMethodDto(expense.getPaymentMethod()
+		                                                                             .getPaymentMethodId(),
+		                                                                      expense.getPaymentMethod().getName(),
+		                                                                      expense.getPaymentMethod()
+		                                                                             .getDisplayName(),
+		                                                                      expense.getPaymentMethod()
+		                                                                             .getType()
+		                                                                             .name()),
 		                              expense.getExpenseDate());
 	}
 
@@ -58,11 +69,16 @@ public class ExpenseService {
 			throw new RuntimeException("Category does not belong to the specified user");
 		}
 
+		PaymentMethod paymentMethod = paymentMethodRepository.findById(expenseRequestDTO.paymentMethodId())
+		                                                     .orElseThrow(() -> new RuntimeException(
+			                                                     "PaymentMethod not found with id: " +
+			                                                     expenseRequestDTO.paymentMethodId()));
+
 		expense.setUser(user);
 		expense.setCategory(category);
 		expense.setAmount(expenseRequestDTO.amount());
 		expense.setDescription(expenseRequestDTO.description());
-		expense.setPaymentMethod(expenseRequestDTO.paymentMethod());
+		expense.setPaymentMethod(paymentMethod);
 		expense.setExpenseDate(expenseRequestDTO.expenseDate());
 
 		return expense;
@@ -93,8 +109,8 @@ public class ExpenseService {
 			throw new IllegalArgumentException("Expense date cannot be in the future");
 		}
 
-		if (dto.paymentMethod() == null || dto.paymentMethod().trim().isEmpty()) {
-			throw new IllegalArgumentException("Payment method cannot be null or empty");
+		if (dto.paymentMethodId() == null) {
+			throw new IllegalArgumentException("Payment method ID cannot be null");
 		}
 	}
 
@@ -133,10 +149,15 @@ public class ExpenseService {
 			throw new RuntimeException("Category does not belong to the specified user");
 		}
 
+		PaymentMethod paymentMethod = paymentMethodRepository.findById(dto.paymentMethodId())
+		                                                     .orElseThrow(() -> new RuntimeException(
+			                                                     "PaymentMethod not found with id: " +
+			                                                     dto.paymentMethodId()));
+
 		expense.setCategory(category);
 		expense.setAmount(dto.amount());
 		expense.setDescription(dto.description());
-		expense.setPaymentMethod(dto.paymentMethod());
+		expense.setPaymentMethod(paymentMethod);
 		expense.setExpenseDate(dto.expenseDate());
 
 		Expense updated = expenseRepository.save(expense);

@@ -20,7 +20,7 @@ public record ExpenseRequestDTO(
 	@Positive
 	BigDecimal amount,
 	String description,
-	String paymentMethod,
+	Long paymentMethodId,
 	LocalDate expenseDate
 ) implements Serializable {
 }

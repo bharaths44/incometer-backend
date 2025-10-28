@@ -15,7 +15,7 @@ public record ExpenseResponseDTO(Long expenseId,
                                  CategoryDto category,
                                  BigDecimal amount,
                                  String description,
-                                 String paymentMethod,
+                                 PaymentMethodDto paymentMethod,
                                  LocalDate expenseDate)
 	implements Serializable {
 	/**
@@ -24,5 +24,14 @@ public record ExpenseResponseDTO(Long expenseId,
 	public record CategoryDto(Long categoryId,
 	                          String name,
 	                          String icon) implements Serializable {
+	}
+
+	/**
+	 * DTO for PaymentMethod
+	 */
+	public record PaymentMethodDto(Long paymentMethodId,
+	                               String name,
+	                               String displayName,
+	                               String type) implements Serializable {
 	}
 }
