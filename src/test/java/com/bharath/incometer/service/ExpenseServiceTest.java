@@ -4,8 +4,8 @@ import com.bharath.incometer.entities.Category;
 import com.bharath.incometer.entities.DTOs.ExpenseRequestDTO;
 import com.bharath.incometer.entities.DTOs.ExpenseResponseDTO;
 import com.bharath.incometer.entities.Expense;
-import com.bharath.incometer.enums.TransactionType;
 import com.bharath.incometer.entities.Users;
+import com.bharath.incometer.enums.TransactionType;
 import com.bharath.incometer.repository.CategoryRepository;
 import com.bharath.incometer.repository.ExpenseRepository;
 import com.bharath.incometer.repository.UsersRepository;
@@ -85,12 +85,11 @@ public class ExpenseServiceTest {
 		System.out.println("Input: " + request);
 		ExpenseResponseDTO expected = new ExpenseResponseDTO(1L,
 		                                                     1L,
-		                                                     1L,
+		                                                     new ExpenseResponseDTO.CategoryDto(1L, "Food", null),
 		                                                     BigDecimal.valueOf(50.00),
 		                                                     "Lunch",
 		                                                     "Cash",
-		                                                     LocalDate.now(),
-		                                                     expense.getCreatedAt());
+		                                                     LocalDate.now());
 		System.out.println("Expected: " + expected);
 
 		ExpenseResponseDTO result = expenseService.createExpense(request);
@@ -108,19 +107,22 @@ public class ExpenseServiceTest {
 		System.out.println("Input: userId=1L");
 		List<ExpenseResponseDTO> expected = List.of(new ExpenseResponseDTO(1L,
 		                                                                   1L,
-		                                                                   1L,
+		                                                                   new ExpenseResponseDTO.CategoryDto(1L,
+		                                                                                                      "Food",
+		                                                                                                      null),
 		                                                                   BigDecimal.valueOf(50.00),
 		                                                                   "Lunch",
 		                                                                   "Cash",
-		                                                                   LocalDate.now(),
-		                                                                   expense.getCreatedAt()));
+		                                                                   LocalDate.now()));
 		System.out.println("Expected: " + expected);
 
 		List<ExpenseResponseDTO> result = expenseService.getExpensesByUserId(1L);
 		System.out.println("Real Output: " + result);
 
 		assertEquals(1, result.size());
-		assertEquals(BigDecimal.valueOf(50.00), result.getFirst().amount());
+		assertEquals(BigDecimal.valueOf(50.00),
+		             result.getFirst()
+		                   .amount());
 	}
 
 	@Test
