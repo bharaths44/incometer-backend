@@ -42,8 +42,10 @@ public class Expense {
 	private String description;
 
 
-	@Column(name = "payment_method")
-	private String paymentMethod;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "payment_method_id")
+	@ToString.Exclude
+	private PaymentMethod paymentMethod;
 
 
 	@Column(name = "expense_date")
