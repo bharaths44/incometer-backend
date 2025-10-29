@@ -1,17 +1,17 @@
 package com.bharath.incometer.entities.DTOs;
 
-import com.bharath.incometer.entities.Expense;
+import com.bharath.incometer.entities.Transaction;
+import com.bharath.incometer.enums.TransactionType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 /**
- * DTO for {@link Expense}
+ * DTO for {@link Transaction}
  */
-public record ExpenseRequestDTO(
+public record TransactionRequestDTO(
 	@NotNull(message = "User ID cannot be null")
 	Long userId,
 	@NotNull(message = "Category ID cannot be null")
@@ -21,6 +21,8 @@ public record ExpenseRequestDTO(
 	BigDecimal amount,
 	String description,
 	Long paymentMethodId,
-	LocalDate expenseDate
-) implements Serializable {
+	LocalDate transactionDate,
+	@NotNull(message = "Transaction type cannot be null")
+	TransactionType transactionType
+) {
 }

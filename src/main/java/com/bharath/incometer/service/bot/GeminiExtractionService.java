@@ -1,4 +1,4 @@
-package com.bharath.incometer.service;
+package com.bharath.incometer.service.bot;
 
 import com.bharath.incometer.enums.TransactionType;
 import com.bharath.incometer.utils.TransactionExtractionResult;
@@ -62,7 +62,8 @@ public class GeminiExtractionService {
 			logger.info("Cleaned json: {}", json);
 
 			// Parse JSON using ObjectMapper
-			@SuppressWarnings("unchecked") Map<String, Object> map = objectMapper.readValue(json, Map.class);
+			@SuppressWarnings("unchecked")
+			Map<String, Object> map = objectMapper.readValue(json, Map.class);
 			logger.info("Parsed map: {}", map);
 
 			BigDecimal amount = map.get("amount") != null ? new BigDecimal(map.get("amount").toString()) : null;
