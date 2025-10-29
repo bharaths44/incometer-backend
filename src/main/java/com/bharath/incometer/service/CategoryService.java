@@ -5,7 +5,7 @@ import com.bharath.incometer.entities.DTOs.CategoryRequestDTO;
 import com.bharath.incometer.entities.DTOs.CategoryResponseDTO;
 import com.bharath.incometer.enums.TransactionType;
 import com.bharath.incometer.repository.CategoryRepository;
-import com.bharath.incometer.repository.ExpenseRepository;
+import com.bharath.incometer.repository.TransactionRepository;
 import com.bharath.incometer.repository.UsersRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,14 +16,14 @@ import java.util.stream.Collectors;
 @Service
 public class CategoryService {
 
-	private final ExpenseRepository expenseRepository;
+	private final TransactionRepository transactionRepository;
 	private final CategoryRepository categoryRepository;
 	private final UsersRepository usersRepository;
 
-	public CategoryService(ExpenseRepository expenseRepository,
+	public CategoryService(TransactionRepository transactionRepository,
 	                       CategoryRepository categoryRepository,
 	                       UsersRepository usersRepository) {
-		this.expenseRepository = expenseRepository;
+		this.transactionRepository = transactionRepository;
 		this.categoryRepository = categoryRepository;
 		this.usersRepository = usersRepository;
 	}
@@ -107,7 +107,7 @@ public class CategoryService {
 		}
 
 		// Check if category has associated expenses
-		boolean hasExpenses = expenseRepository.existsByCategoryCategoryId(id);
+		boolean hasExpenses = transactionRepository.existsByCategoryCategoryId(id);
 		if (hasExpenses) {
 			throw new RuntimeException("Cannot delete category with associated expenses");
 		}

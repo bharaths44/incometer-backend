@@ -1,10 +1,12 @@
-package com.bharath.incometer.service;
+package com.bharath.incometer.service.bot;
 
 import com.bharath.incometer.entities.Users;
 import com.bharath.incometer.repository.UsersRepository;
+import com.bharath.incometer.service.RegistrationService;
 import org.springframework.stereotype.Service;
 
-@Service public class WhatsAppMessageProcessor {
+@Service
+public class WhatsAppMessageProcessor {
 
 	private final UsersRepository usersRepository;
 	private final RegistrationService registrationService;

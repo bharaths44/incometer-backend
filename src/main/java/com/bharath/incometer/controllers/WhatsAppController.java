@@ -1,6 +1,6 @@
 package com.bharath.incometer.controllers;
 
-import com.bharath.incometer.service.WhatsAppMessageProcessor;
+import com.bharath.incometer.service.bot.WhatsAppMessageProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +24,7 @@ public class WhatsAppController {
 	public ResponseEntity<String> receiveMessage(
 		@RequestParam("From") String from,
 		@RequestParam("Body") String body
-	) {
+	                                            ) {
 		// Trim "whatsapp:" prefix and only use phone number
 		String phoneNumber = from.startsWith("whatsapp:") ? from.substring(9) : from;
 

@@ -1,6 +1,8 @@
 package com.bharath.incometer.service;
 
 import com.bharath.incometer.entities.Users;
+import com.bharath.incometer.service.bot.NLPService;
+import com.bharath.incometer.service.bot.TransactionMessageHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +20,7 @@ public class TransactionMessageHandlerTest {
 	private NLPService nlpService;
 
 	@Mock
-	private ExpenseService expenseService;
+	private TransactionService transactionService;
 
 	@Mock
 	private CategoryService categoryService;
@@ -42,10 +44,10 @@ public class TransactionMessageHandlerTest {
 	void testHandleTransactionMessageExpense() {
 		String body = "expense 50 food cash";
 		when(nlpService.handleExpense(any(Users.class),
-									  anyString(),
-									  anyMap(),
-									  any(ExpenseService.class),
-									  any(CategoryService.class))).thenReturn("✅ Recorded");
+		                              anyString(),
+		                              anyMap(),
+		                              any(TransactionService.class),
+		                              any(CategoryService.class))).thenReturn("✅ Recorded");
 
 		System.out.println("Input: user=" + user.getPhoneNumber() + ", body='" + body + "'");
 		String expected = "✅ Recorded";
@@ -63,12 +65,12 @@ public class TransactionMessageHandlerTest {
 
 		System.out.println("Input: user=" + user.getPhoneNumber() + ", body='" + body + "'");
 		String expected = """
-						  ⚠️ Unknown command. Try:
-						  - Register <Name>\
-						  
-						  - Expense <Amount> <Category> <Payment Method> <Optional:Date>\
-						  
-						  - Income <Amount> <Source> <Payment Method> <Optional:Date>""";
+			⚠️ Unknown command. Try:
+			- Register <Name>\
+			
+			- Expense <Amount> <Category> <Payment Method> <Optional:Date>\
+			
+			- Income <Amount> <Source> <Payment Method> <Optional:Date>""";
 		System.out.println("Expected: " + expected);
 
 		String result = transactionMessageHandler.handleTransactionMessage(user, body);

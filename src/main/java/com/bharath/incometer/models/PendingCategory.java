@@ -10,6 +10,6 @@ public class PendingCategory {
 	public BigDecimal amount;
 	public String suggestedCategory;
 	public Long paymentMethodId;
-	public LocalDate expenseDate;
+	public LocalDate transactionDate;
 	public TransactionType type;
 }

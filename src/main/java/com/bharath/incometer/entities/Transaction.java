@@ -1,5 +1,6 @@
 package com.bharath.incometer.entities;
 
+import com.bharath.incometer.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -10,32 +11,47 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-@Entity
-@Table(name = "incomes")
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class Income {
+@Entity
+@Table(name = "transactions")
+public class Transaction {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "income_id")
-	private Long incomeId;
+	@Column(name = "transaction_id")
+	private Long transactionId;
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "user_id", nullable = false)
 	@ToString.Exclude
 	private Users user;
 
-	private String source;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "category_id")
+	@ToString.Exclude
+	private Category category;
 
 	@Column(nullable = false, precision = 10, scale = 2)
 	private BigDecimal amount;
 
-	@Column(name = "received_date")
-	private LocalDate receivedDate;
+	@Column(name = "description", columnDefinition = "TEXT")
+	private String description;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "payment_method_id")
+	@ToString.Exclude
+	private PaymentMethod paymentMethod;
+
+	@Column(name = "transaction_date")
+	private LocalDate transactionDate;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "transaction_type", nullable = false)
+	private TransactionType transactionType;
 
 	@CreationTimestamp
 	@Column(name = "created_at", nullable = false, updatable = false)
@@ -54,8 +70,8 @@ public class Income {
 		                                                       .getPersistentClass()
 		                              : this.getClass();
 		if (thisEffectiveClass != oEffectiveClass) return false;
-		Income income = (Income) o;
-		return getIncomeId() != null && Objects.equals(getIncomeId(), income.getIncomeId());
+		Transaction transaction = (Transaction) o;
+		return getTransactionId() != null && Objects.equals(getTransactionId(), transaction.getTransactionId());
 	}
 
 	@Override
@@ -65,4 +81,3 @@ public class Income {
 		                                                               .hashCode() : getClass().hashCode();
 	}
 }
-

@@ -1,13 +1,13 @@
 package com.bharath.incometer.service;
 
 import com.bharath.incometer.entities.Budget;
-import com.bharath.incometer.entities.Expense;
+import com.bharath.incometer.entities.Transaction;
+import com.bharath.incometer.enums.TransactionType;
 import com.bharath.incometer.models.BudgetAnalytics;
 import com.bharath.incometer.models.CategoryAnalytics;
 import com.bharath.incometer.models.ExpenseSummary;
 import com.bharath.incometer.repository.BudgetRepository;
-import com.bharath.incometer.repository.ExpenseRepository;
-import com.bharath.incometer.repository.IncomeRepository;
+import com.bharath.incometer.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -21,23 +21,20 @@ import java.util.stream.Collectors;
 @Service
 public class AnalyticsService {
 
-	private final IncomeRepository incomeRepository;
-	private final ExpenseRepository expenseRepository;
+	private final TransactionRepository transactionRepository;
 	private final BudgetRepository budgetRepository;
 
-	public AnalyticsService(IncomeRepository incomeRepository,
-	                        ExpenseRepository expenseRepository,
+	public AnalyticsService(TransactionRepository transactionRepository,
 	                        BudgetRepository budgetRepository) {
-		this.incomeRepository = incomeRepository;
-		this.expenseRepository = expenseRepository;
+		this.transactionRepository = transactionRepository;
 		this.budgetRepository = budgetRepository;
 	}
 
 	public ExpenseSummary getExpenseSummary(Long userId) {
-		BigDecimal totalIncome = incomeRepository.sumAmountByUserId(userId);
+		BigDecimal totalIncome = transactionRepository.sumAmountByUserIdAndType(userId, TransactionType.INCOME);
 		if (totalIncome == null) totalIncome = BigDecimal.ZERO;
 
-		BigDecimal totalExpense = expenseRepository.sumAmountByUserId(userId);
+		BigDecimal totalExpense = transactionRepository.sumAmountByUserIdAndType(userId, TransactionType.EXPENSE);
 		if (totalExpense == null) totalExpense = BigDecimal.ZERO;
 
 		BigDecimal netSavings = totalIncome.subtract(totalExpense);
@@ -46,22 +43,25 @@ public class AnalyticsService {
 		LocalDate startOfMonth = now.withDayOfMonth(1);
 		LocalDate endOfMonth = now.withDayOfMonth(now.lengthOfMonth());
 
-		BigDecimal currentMonthExpense = expenseRepository.sumAmountByUserIdAndDateRange(userId,
-		                                                                                 startOfMonth,
-		                                                                                 endOfMonth);
+		BigDecimal currentMonthExpense = transactionRepository.sumAmountByUserIdAndTypeAndDateRange(userId,
+		                                                                                            TransactionType.EXPENSE,
+		                                                                                            startOfMonth,
+		                                                                                            endOfMonth);
 		if (currentMonthExpense == null) currentMonthExpense = BigDecimal.ZERO;
 
-		BigDecimal currentMonthIncome = incomeRepository.sumAmountByUserIdAndDateRange(userId,
-		                                                                               startOfMonth,
-		                                                                               endOfMonth);
+		BigDecimal currentMonthIncome = transactionRepository.sumAmountByUserIdAndTypeAndDateRange(userId,
+		                                                                                           TransactionType.INCOME,
+		                                                                                           startOfMonth,
+		                                                                                           endOfMonth);
 		if (currentMonthIncome == null) currentMonthIncome = BigDecimal.ZERO;
 
 		return new ExpenseSummary(totalIncome, totalExpense, netSavings, currentMonthExpense, currentMonthIncome);
 	}
 
 	public List<CategoryAnalytics> getCategoryAnalytics(Long userId) {
-		List<Expense> expenses = expenseRepository.findByUserUserId(userId);
-		BigDecimal totalExpense = expenseRepository.sumAmountByUserId(userId);
+		List<Transaction> expenses = transactionRepository.findByUserUserIdAndTransactionType(userId,
+		                                                                                      TransactionType.EXPENSE);
+		BigDecimal totalExpense = transactionRepository.sumAmountByUserIdAndType(userId, TransactionType.EXPENSE);
 		if (totalExpense == null || totalExpense.equals(BigDecimal.ZERO)) {
 			return Collections.emptyList();
 		}
@@ -71,7 +71,7 @@ public class AnalyticsService {
 			                                                     expense -> expense.getCategory()
 			                                                                       .getName(),
 			                                                     Collectors.reducing(BigDecimal.ZERO,
-			                                                                         Expense::getAmount,
+			                                                                         Transaction::getAmount,
 			                                                                         BigDecimal::add)
 		                                                                                   ));
 
@@ -98,7 +98,7 @@ public class AnalyticsService {
 			                                                .getName();
 			                    BigDecimal limit = budget.getAmountLimit();
 
-			                    BigDecimal spent = expenseRepository.sumAmountByUserIdAndCategoryIdAndDateRange(
+			                    BigDecimal spent = transactionRepository.sumAmountByUserIdAndCategoryIdAndDateRange(
 				                    userId,
 				                    budget.getCategory()
 				                          .getCategoryId(),
