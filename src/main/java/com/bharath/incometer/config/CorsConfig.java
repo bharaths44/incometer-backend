@@ -12,7 +12,8 @@ public class CorsConfig implements WebMvcConfigurer {
 		registry.addMapping("/api/**")
 		        .allowedOrigins("https://k7hff2hr-5173.inc1.devtunnels.ms",
 		                        "https://k7hff2hr-8080.inc1.devtunnels.ms",
-		                        "http://localhost:4173"
+		                        "http://localhost:4173",
+		                        "http://localhost:5173"
 
 		                       )
 		        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")

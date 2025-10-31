@@ -13,14 +13,14 @@ import java.util.List;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
-	boolean existsByCategoryCategoryId(Long categoryId);
+//	boolean existsByCategoryCategoryId(Long categoryId);
 
 	List<Transaction> findByUserUserId(Long userId);
 
 	List<Transaction> findByUserUserIdAndTransactionDateBetween(
 		Long userId, LocalDate startDate, LocalDate endDate);
 
-	List<Transaction> findByUserUserIdAndCategoryCategoryId(Long userId, Long categoryId);
+//	List<Transaction> findByUserUserIdAndCategoryCategoryId(Long userId, Long categoryId);
 
 	List<Transaction> findByUserUserIdAndTransactionType(Long userId, TransactionType transactionType);
 
@@ -37,15 +37,15 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 		@Param("userId") Long userId,
 		@Param("transactionType") TransactionType transactionType);
 
-	@Query(
-		"SELECT SUM(t.amount) FROM Transaction t WHERE t.user.userId = :userId " +
-		"AND t.transactionDate BETWEEN :startDate AND :endDate"
-	)
-	BigDecimal sumAmountByUserIdAndDateRange(
-		@Param("userId") Long userId,
-		@Param("startDate") LocalDate startDate,
-		@Param("endDate") LocalDate endDate);
+//	@Query(
+//		"SELECT SUM(t.amount) FROM Transaction t WHERE t.user.userId = :userId " +
+//		"AND t.transactionDate BETWEEN :startDate AND :endDate"
+//	)
 
+	/// /	BigDecimal sumAmountByUserIdAndDateRange(
+//		@Param("userId") Long userId,
+//		@Param("startDate") LocalDate startDate,
+//		@Param("endDate") LocalDate endDate);
 	@Query(
 		"SELECT SUM(t.amount) FROM Transaction t WHERE t.user.userId = :userId AND t.transactionType = " +
 		":transactionType " +
@@ -67,4 +67,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 		@Param("categoryId") Long categoryId,
 		@Param("startDate") LocalDate startDate,
 		@Param("endDate") LocalDate endDate);
+
+	void deleteByCategoryCategoryId(Long id);
+
+	void deleteByPaymentMethodPaymentMethodId(Long id);
 }

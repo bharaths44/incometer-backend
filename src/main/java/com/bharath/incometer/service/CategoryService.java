@@ -4,6 +4,7 @@ import com.bharath.incometer.entities.Category;
 import com.bharath.incometer.entities.DTOs.CategoryRequestDTO;
 import com.bharath.incometer.entities.DTOs.CategoryResponseDTO;
 import com.bharath.incometer.enums.TransactionType;
+import com.bharath.incometer.repository.BudgetRepository;
 import com.bharath.incometer.repository.CategoryRepository;
 import com.bharath.incometer.repository.TransactionRepository;
 import com.bharath.incometer.repository.UsersRepository;
@@ -19,13 +20,16 @@ public class CategoryService {
 	private final TransactionRepository transactionRepository;
 	private final CategoryRepository categoryRepository;
 	private final UsersRepository usersRepository;
+	private final BudgetRepository budgetRepository;
 
 	public CategoryService(TransactionRepository transactionRepository,
 	                       CategoryRepository categoryRepository,
-	                       UsersRepository usersRepository) {
+	                       UsersRepository usersRepository,
+	                       BudgetRepository budgetRepository) {
 		this.transactionRepository = transactionRepository;
 		this.categoryRepository = categoryRepository;
 		this.usersRepository = usersRepository;
+		this.budgetRepository = budgetRepository;
 	}
 
 	private CategoryResponseDTO toDTO(Category category) {
@@ -106,12 +110,11 @@ public class CategoryService {
 			throw new RuntimeException("User does not have permission to delete this category");
 		}
 
-		// Check if category has associated expenses
-		boolean hasExpenses = transactionRepository.existsByCategoryCategoryId(id);
-		if (hasExpenses) {
-			throw new RuntimeException("Cannot delete category with associated expenses");
-		}
+		budgetRepository.deleteByCategoryCategoryId(id);
 
+		transactionRepository.deleteByCategoryCategoryId(id);
+
+		// Delete the category
 		categoryRepository.delete(existingCategory);
 	}
 
@@ -140,12 +143,6 @@ public class CategoryService {
 	public Long getCategoryIdByName(String categoryName, Long userId) {
 		Category category = categoryRepository.findByUserUserIdAndNameIgnoreCase(userId, categoryName);
 		return category != null ? category.getCategoryId() : null;
-	}
-
-	public List<String> getAllCategoryNamesForUser(Long userId) {
-		// Get user categories
-		List<Category> userCategories = categoryRepository.findByUserUserId(userId);
-		return userCategories.stream().map(Category::getName).collect(Collectors.toList());
 	}
 
 	public List<String> getAllCategoryNamesForUserByType(Long userId, TransactionType type) {

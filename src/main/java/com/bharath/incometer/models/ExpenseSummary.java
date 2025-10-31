@@ -15,4 +15,7 @@ public class ExpenseSummary {
 	private BigDecimal netSavings;
 	private BigDecimal currentMonthExpense;
 	private BigDecimal currentMonthIncome;
+	private BigDecimal incomePercentageChange;
+	private BigDecimal expensePercentageChange;
+	private BigDecimal savingsPercentageChange;
 }
