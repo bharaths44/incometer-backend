@@ -6,6 +6,7 @@ import com.bharath.incometer.entities.PaymentMethod;
 import com.bharath.incometer.entities.Users;
 import com.bharath.incometer.enums.PaymentType;
 import com.bharath.incometer.repository.PaymentMethodRepository;
+import com.bharath.incometer.repository.TransactionRepository;
 import com.bharath.incometer.repository.UsersRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ public class PaymentMethodService {
 
 	private final PaymentMethodRepository repository;
 	private final UsersRepository usersRepository;
+	private final TransactionRepository transactionRepository;
 
 
 	public PaymentMethod savePaymentMethod(PaymentMethod paymentMethod, Long userId) {
@@ -68,6 +70,8 @@ public class PaymentMethodService {
 
 
 	public void delete(Long id) {
+		// Delete associated transactions first
+		transactionRepository.deleteByPaymentMethodPaymentMethodId(id);
 		repository.deleteById(id);
 	}
 
