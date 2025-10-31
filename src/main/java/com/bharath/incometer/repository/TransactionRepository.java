@@ -3,6 +3,7 @@ package com.bharath.incometer.repository;
 import com.bharath.incometer.entities.Transaction;
 import com.bharath.incometer.enums.TransactionType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -68,7 +69,10 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 		@Param("startDate") LocalDate startDate,
 		@Param("endDate") LocalDate endDate);
 
-	void deleteByCategoryCategoryId(Long id);
+	@Modifying
+	@Query("DELETE FROM Transaction t WHERE t.category.categoryId = :categoryId")
+	void deleteByCategoryId(
+		@Param("categoryId") Long categoryId);
 
 	void deleteByPaymentMethodPaymentMethodId(Long id);
 }

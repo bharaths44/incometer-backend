@@ -19,6 +19,8 @@ INSERT INTO categories (name, icon, type, user_id, created_at)
 VALUES ('Salary', 'dollar-sign', 'INCOME', 1, NOW());
 INSERT INTO categories (name, icon, type, user_id, created_at)
 VALUES ('Freelance', 'briefcase', 'INCOME', 1, NOW());
+INSERT INTO categories (name, icon, type, user_id, created_at)
+VALUES ('Investments', 'chart-line', 'EXPENSE', 1, NOW());
 
 -- Insert transactions (expenses)
 INSERT INTO transactions (amount, description, transaction_date, transaction_type, user_id, category_id,
@@ -38,13 +40,17 @@ VALUES (1000.00, 'Freelance Project', '2025-10-15', 'INCOME', 1, 4, 2, NOW());
 
 -- Additional budget examples
 -- Yearly budget for Food
-INSERT INTO budgets (amount_limit, start_date, end_date, frequency, is_active, user_id, category_id, created_at)
-VALUES (6000.00, '2025-01-01', '2025-12-31', 'YEARLY', true, 1, 1, NOW());
+INSERT INTO budgets (amount, start_date, end_date, frequency, is_active, user_id, category_id, type, created_at)
+VALUES (6000.00, '2025-01-01', '2025-12-31', 'YEARLY', true, 1, 1, 'LIMIT', NOW());
 
 -- One-time budget for Transportation (expired)
-INSERT INTO budgets (amount_limit, start_date, end_date, frequency, is_active, user_id, category_id, created_at)
-VALUES (150.00, '2025-09-01', '2025-09-30', 'ONE_TIME', false, 1, 2, NOW());
+INSERT INTO budgets (amount, start_date, end_date, frequency, is_active, user_id, category_id, type, created_at)
+VALUES (150.00, '2025-09-01', '2025-09-30', 'ONE_TIME', false, 1, 2, 'LIMIT', NOW());
 
 -- Weekly budget for Food (current week)
-INSERT INTO budgets (amount_limit, start_date, end_date, frequency, is_active, user_id, category_id, created_at)
-VALUES (100.00, '2025-10-21', '2025-10-27', 'WEEKLY', true, 1, 1, NOW());
+INSERT INTO budgets (amount, start_date, end_date, frequency, is_active, user_id, category_id, type, created_at)
+VALUES (100.00, '2025-10-21', '2025-10-27', 'WEEKLY', true, 1, 1, 'LIMIT', NOW());
+
+-- Yearly target for Investments
+INSERT INTO budgets (amount, start_date, end_date, frequency, is_active, user_id, category_id, type, created_at)
+VALUES (12000.00, '2025-01-01', '2025-12-31', 'YEARLY', true, 1, 5, 'TARGET', NOW());

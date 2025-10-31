@@ -110,9 +110,11 @@ public class CategoryService {
 			throw new RuntimeException("User does not have permission to delete this category");
 		}
 
-		budgetRepository.deleteByCategoryCategoryId(id);
+		// Delete associated budgets
+		budgetRepository.deleteByCategoryId(id);
 
-		transactionRepository.deleteByCategoryCategoryId(id);
+		// Delete associated transactions
+		transactionRepository.deleteByCategoryId(id);
 
 		// Delete the category
 		categoryRepository.delete(existingCategory);
