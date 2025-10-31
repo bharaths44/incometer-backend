@@ -12,7 +12,7 @@ import java.util.List;
 @Repository
 public interface BudgetRepository extends JpaRepository<Budget, Long> {
 
-	List<Budget> findByUserUserId(Long userId);
+//	List<Budget> findByUserUserId(Long userId);
 
 	@Query("SELECT b FROM Budget b WHERE b.user.userId = :userId AND b.active = true AND :currentDate BETWEEN b" +
 	       ".startDate AND b.endDate")
@@ -20,11 +20,13 @@ public interface BudgetRepository extends JpaRepository<Budget, Long> {
 		@Param("userId") Long userId,
 		@Param("currentDate") LocalDate currentDate);
 
-	@Query("SELECT b FROM Budget b WHERE b.user.userId = :userId AND b.category.categoryId = :categoryId AND b.active " +
-	       "= true AND :currentDate BETWEEN b.startDate AND b.endDate")
-	List<Budget> findActiveBudgetsForUserCategoryAndDate(
-		@Param("userId") Long userId,
-		@Param("categoryId") Long categoryId,
-		@Param("currentDate") LocalDate currentDate);
+	@Query(
+		"SELECT b FROM Budget b WHERE b.user.userId = :userId AND b.category.categoryId = :categoryId AND b.active " +
+		"= true AND :currentDate BETWEEN b.startDate AND b.endDate")
+//	List<Budget> findActiveBudgetsForUserCategoryAndDate(
+//		@Param("userId") Long userId,
+//		@Param("categoryId") Long categoryId,
+//		@Param("currentDate") LocalDate currentDate);
 
+	void deleteByCategoryCategoryId(Long id);
 }
