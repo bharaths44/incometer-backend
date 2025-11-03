@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -40,8 +41,8 @@ public class AnalyticsService {
 		BigDecimal netSavings = totalIncome.subtract(totalExpense);
 
 		LocalDate now = LocalDate.now();
-		LocalDate startOfMonth = now.withDayOfMonth(1);
-		LocalDate endOfMonth = now.withDayOfMonth(now.lengthOfMonth());
+		LocalDate startOfMonth = now.with(TemporalAdjusters.firstDayOfMonth());
+		LocalDate endOfMonth = now.with(TemporalAdjusters.lastDayOfMonth());
 
 		BigDecimal currentMonthExpense = transactionRepository.sumAmountByUserIdAndTypeAndDateRange(userId,
 		                                                                                            TransactionType.EXPENSE,
@@ -56,10 +57,9 @@ public class AnalyticsService {
 		if (currentMonthIncome == null) currentMonthIncome = BigDecimal.ZERO;
 
 		// Calculate previous month values
-		LocalDate previousMonthStart = now.minusMonths(1).withDayOfMonth(1);
-
-		LocalDate previousMonthEnd = now.minusMonths(1)
-		                                .withDayOfMonth(now.minusMonths(1).lengthOfMonth());
+		LocalDate previousMonth = now.minusMonths(1);
+		LocalDate previousMonthStart = previousMonth.with(TemporalAdjusters.firstDayOfMonth());
+		LocalDate previousMonthEnd = previousMonth.with(TemporalAdjusters.lastDayOfMonth());
 
 		BigDecimal previousMonthIncome = transactionRepository.sumAmountByUserIdAndTypeAndDateRange(userId,
 		                                                                                            TransactionType.INCOME,

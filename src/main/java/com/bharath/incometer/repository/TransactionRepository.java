@@ -69,6 +69,19 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 		@Param("startDate") LocalDate startDate,
 		@Param("endDate") LocalDate endDate);
 
+	@Query(
+		"SELECT SUM(t.amount) FROM Transaction t WHERE t.user.userId = :userId " +
+		"AND t.category.categoryId = :categoryId " +
+		"AND t.transactionType = :transactionType " +
+		"AND t.transactionDate BETWEEN :startDate AND :endDate"
+	)
+	BigDecimal sumAmountByUserIdAndCategoryIdAndTypeAndDateRange(
+		@Param("userId") Long userId,
+		@Param("categoryId") Long categoryId,
+		@Param("transactionType") TransactionType transactionType,
+		@Param("startDate") LocalDate startDate,
+		@Param("endDate") LocalDate endDate);
+
 	@Modifying
 	@Query("DELETE FROM Transaction t WHERE t.category.categoryId = :categoryId")
 	void deleteByCategoryId(
