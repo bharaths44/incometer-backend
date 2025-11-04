@@ -31,8 +31,11 @@ public class Users {
 	@Column(nullable = false, unique = true)
 	private String email;
 
-	@Column(nullable = false, unique = true)
+	@Column(unique = true)
 	private String phoneNumber;
+
+	@Column(name = "auth0_sub", unique = true)
+	private String auth0Sub;
 
 	@CreationTimestamp
 	@Column(name = "created_at", nullable = false, updatable = false)
@@ -66,4 +69,3 @@ public class Users {
 		                                                               .hashCode() : getClass().hashCode();
 	}
 }
-
