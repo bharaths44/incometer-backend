@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
  */
 public record CategoryResponseDTO(
 	Long categoryId,
-	Long userId,
+	java.util.UUID userId,
 	String name,
 	String icon,
 	TransactionType type,

@@ -12,8 +12,7 @@ import java.time.LocalDate;
  * DTO for {@link Transaction}
  */
 public record TransactionRequestDTO(
-	@NotNull(message = "User ID cannot be null")
-	Long userId,
+	java.util.UUID userId,
 	@NotNull(message = "Category ID cannot be null")
 	Long categoryId,
 	@NotNull(message = "Amount cannot be null")

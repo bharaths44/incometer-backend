@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/users")
@@ -20,7 +21,8 @@ public class UserController {
 	}
 
 	@PostMapping
-	public ResponseEntity<UserResponseDTO> createUser(@RequestBody UserRequestDTO userRequestDTO) {
+	public ResponseEntity<UserResponseDTO> createUser(
+		@RequestBody UserRequestDTO userRequestDTO) {
 		try {
 			UserResponseDTO createdUser = userService.createUser(userRequestDTO);
 			return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
@@ -35,7 +37,8 @@ public class UserController {
 
 
 	@GetMapping("/{userId}")
-	public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long userId) {
+	public ResponseEntity<UserResponseDTO> getUserById(
+		@PathVariable UUID userId) {
 		try {
 			UserResponseDTO user = userService.getUserById(userId);
 			return ResponseEntity.ok(user);
@@ -53,8 +56,9 @@ public class UserController {
 
 
 	@PutMapping("/{userId}")
-	public ResponseEntity<UserResponseDTO> updateUser(@PathVariable Long userId,
-	                                                  @RequestBody UserRequestDTO userRequestDTO) {
+	public ResponseEntity<UserResponseDTO> updateUser(
+		@PathVariable UUID userId,
+		@RequestBody UserRequestDTO userRequestDTO) {
 		try {
 			UserResponseDTO updatedUser = userService.updateUser(userId, userRequestDTO);
 			return ResponseEntity.ok(updatedUser);
@@ -71,7 +75,8 @@ public class UserController {
 	}
 
 	@DeleteMapping("/{userId}")
-	public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
+	public ResponseEntity<Void> deleteUser(
+		@PathVariable UUID userId) {
 		try {
 			userService.deleteUser(userId);
 			return ResponseEntity.noContent().build();

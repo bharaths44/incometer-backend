@@ -11,6 +11,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
@@ -35,7 +37,7 @@ public class WhatsAppMessageProcessorTest {
 	void setUp() {
 
 		user = new Users();
-		user.setUserId(1L);
+		user.setUserId(UUID.fromString("550e8400-e29b-41d4-a716-446655440000"));
 		user.setName("Test User");
 		user.setPhoneNumber("1234567890");
 	}

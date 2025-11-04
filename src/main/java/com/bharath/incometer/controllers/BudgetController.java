@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/budgets")
@@ -49,7 +50,7 @@ public class BudgetController {
 
 	@GetMapping("/user/{userId}")
 	public ResponseEntity<List<BudgetResponseDTO>> getBudgetsByUser(
-		@PathVariable Long userId) {
+		@PathVariable UUID userId) {
 		try {
 			List<BudgetResponseDTO> budgets = budgetService.getBudgetsByUser(userId);
 			return ResponseEntity.ok(budgets);
@@ -62,7 +63,7 @@ public class BudgetController {
 
 	@GetMapping("/user/{userId}/date")
 	public ResponseEntity<List<BudgetResponseDTO>> getBudgetsByUserAndDate(
-		@PathVariable Long userId,
+		@PathVariable UUID userId,
 		@RequestParam(required = false) LocalDate date) {
 		try {
 			LocalDate queryDate = date != null ? date : LocalDate.now();
@@ -93,7 +94,7 @@ public class BudgetController {
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteBudget(
 		@PathVariable Long id,
-		@RequestParam Long userId) {
+		@RequestParam UUID userId) {
 		try {
 			budgetService.deleteBudget(id, userId);
 			return ResponseEntity.noContent().build();
@@ -107,7 +108,7 @@ public class BudgetController {
 	@PutMapping("/{id}/deactivate")
 	public ResponseEntity<BudgetResponseDTO> deactivateBudget(
 		@PathVariable Long id,
-		@RequestParam Long userId) {
+		@RequestParam UUID userId) {
 		System.out.println("Deactivating Budget with ID: " + id);
 		try {
 			BudgetResponseDTO response = budgetService.deactivateBudget(id, userId);

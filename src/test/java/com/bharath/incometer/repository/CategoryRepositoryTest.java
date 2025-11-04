@@ -1,8 +1,8 @@
 package com.bharath.incometer.repository;
 
 import com.bharath.incometer.entities.Category;
-import com.bharath.incometer.enums.TransactionType;
 import com.bharath.incometer.entities.Users;
+import com.bharath.incometer.enums.TransactionType;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,7 +38,7 @@ public class CategoryRepositoryTest {
 		u.setName("Test User");
 		u.setEmail("test@example.com");
 		u.setPhoneNumber("1234567890");
-		u.setPassword("password");
+
 		return usersRepository.save(u);
 	}
 

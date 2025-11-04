@@ -8,10 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/payment-methods")
-@CrossOrigin(origins = "http://localhost:5173") // enable dev frontend access
 @RequiredArgsConstructor
 public class PaymentMethodController {
 
@@ -33,7 +33,7 @@ public class PaymentMethodController {
 
 	@GetMapping("/user/{userId}")
 	public ResponseEntity<List<PaymentMethodResponseDTO>> getByUser(
-		@PathVariable Long userId) {
+		@PathVariable UUID userId) {
 		List<PaymentMethodResponseDTO> dtos = paymentMethodService.getByUserId(userId);
 		return ResponseEntity.ok(dtos);
 	}
@@ -41,7 +41,7 @@ public class PaymentMethodController {
 	@PostMapping
 	public ResponseEntity<PaymentMethodResponseDTO> create(
 		@RequestBody PaymentMethodRequestDTO dto,
-		@RequestParam(required = false) Long userId) {
+		@RequestParam(required = false) UUID userId) {
 		PaymentMethodResponseDTO response = paymentMethodService.create(dto, userId);
 		return ResponseEntity.ok(response);
 	}
@@ -50,7 +50,7 @@ public class PaymentMethodController {
 	public ResponseEntity<PaymentMethodResponseDTO> update(
 		@PathVariable Long id,
 		@RequestBody PaymentMethodRequestDTO dto,
-		@RequestParam(required = false) Long userId) {
+		@RequestParam(required = false) UUID userId) {
 		try {
 			PaymentMethodResponseDTO response = paymentMethodService.update(id, dto, userId);
 			return ResponseEntity.ok(response);

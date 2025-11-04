@@ -26,7 +26,6 @@ public class UsersRepositoryTest {
 		u.setName("Test User");
 		u.setEmail("test@example.com");
 		u.setPhoneNumber("1234567890");
-		u.setPassword("password");
 		usersRepository.save(u);
 	}
 

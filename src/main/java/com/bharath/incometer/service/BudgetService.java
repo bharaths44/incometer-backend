@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -131,7 +132,7 @@ public class BudgetService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<BudgetResponseDTO> getBudgetsByUser(Long userId) {
+	public List<BudgetResponseDTO> getBudgetsByUser(UUID userId) {
 		if (userId == null) {
 			throw new IllegalArgumentException("User ID cannot be null");
 		}
@@ -146,7 +147,7 @@ public class BudgetService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<BudgetResponseDTO> getBudgetsByUserAndDate(Long userId, LocalDate date) {
+	public List<BudgetResponseDTO> getBudgetsByUserAndDate(UUID userId, LocalDate date) {
 		if (userId == null) {
 			throw new IllegalArgumentException("User ID cannot be null");
 		}
@@ -199,7 +200,7 @@ public class BudgetService {
 	}
 
 	@Transactional
-	public void deleteBudget(Long budgetId, Long userId) {
+	public void deleteBudget(Long budgetId, UUID userId) {
 		if (budgetId == null) {
 			throw new IllegalArgumentException("Budget ID cannot be null");
 		}
@@ -221,7 +222,7 @@ public class BudgetService {
 	}
 
 	@Transactional
-	public BudgetResponseDTO deactivateBudget(Long budgetId, Long userId) {
+	public BudgetResponseDTO deactivateBudget(Long budgetId, UUID userId) {
 		if (budgetId == null) {
 			throw new IllegalArgumentException("Budget ID cannot be null");
 		}

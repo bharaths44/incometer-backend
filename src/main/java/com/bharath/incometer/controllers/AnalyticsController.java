@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/analytics")
@@ -24,21 +25,21 @@ public class AnalyticsController {
 
 	@GetMapping("/user/{userId}/expense-summary")
 	public ResponseEntity<ExpenseSummary> getExpenseSummary(
-		@PathVariable Long userId) {
+		@PathVariable UUID userId) {
 		ExpenseSummary summary = analyticsService.getExpenseSummary(userId);
 		return ResponseEntity.ok(summary);
 	}
 
 	@GetMapping("/user/{userId}/categories")
 	public ResponseEntity<List<CategoryAnalytics>> getCategoryAnalytics(
-		@PathVariable Long userId) {
+		@PathVariable UUID userId) {
 		List<CategoryAnalytics> categories = analyticsService.getCategoryAnalytics(userId);
 		return ResponseEntity.ok(categories);
 	}
 
 	@GetMapping("/user/{userId}/budgets")
 	public ResponseEntity<List<BudgetAnalytics>> getBudgetAnalytics(
-		@PathVariable Long userId) {
+		@PathVariable UUID userId) {
 		List<BudgetAnalytics> budgets = analyticsService.getBudgetAnalytics(userId);
 		return ResponseEntity.ok(budgets);
 	}
