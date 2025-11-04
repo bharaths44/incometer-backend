@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 public record UserResponseDTO(java.util.UUID userId,
                               @NotNull String name,
                               @NotNull String email,
-                              @NotNull String phoneNumber,
+                              String phoneNumber,
                               LocalDateTime createdAt,
                               LocalDateTime updatedAt) {
 }
