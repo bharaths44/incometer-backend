@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,11 +36,11 @@ public class UserServiceTest {
 	void setUp() {
 
 		user = new Users();
-		user.setUserId(1L);
+		user.setUserId(UUID.fromString("550e8400-e29b-41d4-a716-446655440000"));
 		user.setName("Test User");
 		user.setEmail("test@example.com");
 		user.setPhoneNumber("1234567890");
-		user.setPassword("password");
+
 		user.setCreatedAt(LocalDateTime.now());
 		user.setUpdatedAt(LocalDateTime.now());
 	}
@@ -51,12 +52,12 @@ public class UserServiceTest {
 		when(usersRepository.save(any(Users.class))).thenReturn(user);
 
 		System.out.println("Input: " + request);
-		UserResponseDTO expected = new UserResponseDTO(1L,
-													   "Test User",
-													   "test@example.com",
-													   "1234567890",
-													   user.getCreatedAt(),
-													   user.getUpdatedAt());
+		UserResponseDTO expected = new UserResponseDTO(UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),
+		                                               "Test User",
+		                                               "test@example.com",
+		                                               "1234567890",
+		                                               user.getCreatedAt(),
+		                                               user.getUpdatedAt());
 		System.out.println("Expected: " + expected);
 
 		UserResponseDTO result = userService.createUser(request);
@@ -69,18 +70,19 @@ public class UserServiceTest {
 
 	@Test
 	void testGetUserById() {
-		when(usersRepository.findById(1L)).thenReturn(Optional.of(user));
+		when(usersRepository.findById(UUID.fromString("550e8400-e29b-41d4-a716-446655440000"))).thenReturn(Optional.of(
+			user));
 
 		System.out.println("Input: userId=1L");
-		UserResponseDTO expected = new UserResponseDTO(1L,
-													   "Test User",
-													   "test@example.com",
-													   "1234567890",
-													   user.getCreatedAt(),
-													   user.getUpdatedAt());
+		UserResponseDTO expected = new UserResponseDTO(UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),
+		                                               "Test User",
+		                                               "test@example.com",
+		                                               "1234567890",
+		                                               user.getCreatedAt(),
+		                                               user.getUpdatedAt());
 		System.out.println("Expected: " + expected);
 
-		UserResponseDTO result = userService.getUserById(1L);
+		UserResponseDTO result = userService.getUserById(UUID.fromString("550e8400-e29b-41d4-a716-446655440000"));
 		System.out.println("Real Output: " + result);
 
 		assertEquals(expected.userId(), result.userId());
@@ -92,12 +94,13 @@ public class UserServiceTest {
 		when(usersRepository.findAll()).thenReturn(Collections.singletonList(user));
 
 		System.out.println("Input: none");
-		List<UserResponseDTO> expected = List.of(new UserResponseDTO(1L,
-																	 "Test User",
-																	 "test@example.com",
-																	 "1234567890",
-																	 user.getCreatedAt(),
-																	 user.getUpdatedAt()));
+		List<UserResponseDTO> expected = List.of(new UserResponseDTO(UUID.fromString(
+			"550e8400-e29b-41d4-a716-446655440000"),
+		                                                             "Test User",
+		                                                             "test@example.com",
+		                                                             "1234567890",
+		                                                             user.getCreatedAt(),
+		                                                             user.getUpdatedAt()));
 		System.out.println("Expected: " + expected);
 
 		List<UserResponseDTO> result = userService.getAllUsers();

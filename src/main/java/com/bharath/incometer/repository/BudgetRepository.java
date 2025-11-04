@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Repository
 public interface BudgetRepository extends JpaRepository<Budget, Long> {
@@ -18,7 +19,7 @@ public interface BudgetRepository extends JpaRepository<Budget, Long> {
 	@Query("SELECT b FROM Budget b WHERE b.user.userId = :userId AND b.active = true AND :currentDate BETWEEN b" +
 	       ".startDate AND b.endDate")
 	List<Budget> findActiveBudgetsForUserAndDate(
-		@Param("userId") Long userId,
+		@Param("userId") UUID userId,
 		@Param("currentDate") LocalDate currentDate);
 
 //	@Query(

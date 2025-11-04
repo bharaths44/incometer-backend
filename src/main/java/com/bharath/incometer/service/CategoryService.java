@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -93,7 +94,7 @@ public class CategoryService {
 	}
 
 	@Transactional
-	public void deleteCategory(Long id, Long userId) {
+	public void deleteCategory(Long id, UUID userId) {
 		if (id == null) {
 			throw new IllegalArgumentException("Category ID cannot be null");
 		}
@@ -134,7 +135,7 @@ public class CategoryService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<CategoryResponseDTO> getCategoriesByUserId(Long userId) {
+	public List<CategoryResponseDTO> getCategoriesByUserId(UUID userId) {
 		if (userId == null) {
 			throw new IllegalArgumentException("User ID cannot be null");
 		}
@@ -142,19 +143,19 @@ public class CategoryService {
 		return categoryRepository.findByUserUserId(userId).stream().map(this::toDTO).collect(Collectors.toList());
 	}
 
-	public Long getCategoryIdByName(String categoryName, Long userId) {
+	public Long getCategoryIdByName(String categoryName, UUID userId) {
 		Category category = categoryRepository.findByUserUserIdAndNameIgnoreCase(userId, categoryName);
 		return category != null ? category.getCategoryId() : null;
 	}
 
-	public List<String> getAllCategoryNamesForUserByType(Long userId, TransactionType type) {
+	public List<String> getAllCategoryNamesForUserByType(UUID userId, TransactionType type) {
 		// Get user categories by type
 		List<Category> userCategories = categoryRepository.findByUserUserIdAndType(userId, type);
 		return userCategories.stream().map(Category::getName).collect(Collectors.toList());
 	}
 
 	@Transactional
-	public Long createCategoryForUser(String categoryName, Long userId, TransactionType type) {
+	public Long createCategoryForUser(String categoryName, UUID userId, TransactionType type) {
 		Category category = new Category();
 		category.setName(capitalize(categoryName));
 		category.setIcon("circle"); // Default icon

@@ -18,6 +18,7 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,7 +32,7 @@ public class AnalyticsService {
 		this.budgetRepository = budgetRepository;
 	}
 
-	public ExpenseSummary getExpenseSummary(Long userId) {
+	public ExpenseSummary getExpenseSummary(UUID userId) {
 		BigDecimal totalIncome = transactionRepository.sumAmountByUserIdAndType(userId, TransactionType.INCOME);
 		if (totalIncome == null) totalIncome = BigDecimal.ZERO;
 
@@ -91,7 +92,7 @@ public class AnalyticsService {
 		                          savingsPercentageChange);
 	}
 
-	public List<CategoryAnalytics> getCategoryAnalytics(Long userId) {
+	public List<CategoryAnalytics> getCategoryAnalytics(UUID userId) {
 		List<Transaction> expenses = transactionRepository.findByUserUserIdAndTransactionType(userId,
 		                                                                                      TransactionType.EXPENSE);
 		BigDecimal totalExpense = transactionRepository.sumAmountByUserIdAndType(userId, TransactionType.EXPENSE);
@@ -116,7 +117,7 @@ public class AnalyticsService {
 		}).collect(Collectors.toList());
 	}
 
-	public List<BudgetAnalytics> getBudgetAnalytics(Long userId) {
+	public List<BudgetAnalytics> getBudgetAnalytics(UUID userId) {
 		LocalDate currentDate = LocalDate.now();
 		List<Budget> activeBudgets = budgetRepository.findActiveBudgetsForUserAndDate(userId, currentDate);
 

@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
-public record UserResponseDTO(@NotNull Long userId,
+public record UserResponseDTO(java.util.UUID userId,
                               @NotNull String name,
                               @NotNull String email,
                               @NotNull String phoneNumber,

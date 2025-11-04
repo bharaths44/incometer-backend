@@ -8,9 +8,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Service public class UserService {
+@Service
+public class UserService {
 
 	private final UsersRepository usersRepository;
 
@@ -18,7 +20,8 @@ import java.util.stream.Collectors;
 		this.usersRepository = usersRepository;
 	}
 
-	@Transactional public UserResponseDTO createUser(UserRequestDTO userRequestDTO) {
+	@Transactional
+	public UserResponseDTO createUser(UserRequestDTO userRequestDTO) {
 		if (userRequestDTO == null) {
 			throw new IllegalArgumentException("User data cannot be null");
 		}
@@ -51,14 +54,14 @@ import java.util.stream.Collectors;
 
 		// In a real application, you would encode the password
 		// user.setPassword(passwordEncoder.encode(userRequestDTO.password()));
-		user.setPassword(userRequestDTO.password());
+
 
 		Users savedUser = usersRepository.save(user);
 		return mapToResponseDTO(savedUser);
 	}
 
 
-	public UserResponseDTO getUserById(Long userId) {
+	public UserResponseDTO getUserById(UUID userId) {
 		if (userId == null) {
 			throw new IllegalArgumentException("User ID cannot be null");
 		}
@@ -69,7 +72,8 @@ import java.util.stream.Collectors;
 	}
 
 
-	@Transactional public UserResponseDTO updateUser(Long userId, UserRequestDTO userRequestDTO) {
+	@Transactional
+	public UserResponseDTO updateUser(UUID userId, UserRequestDTO userRequestDTO) {
 		if (userId == null) {
 			throw new IllegalArgumentException("User ID cannot be null");
 		}
@@ -95,17 +99,13 @@ import java.util.stream.Collectors;
 			existingUser.setPhoneNumber(userRequestDTO.phoneNumber());
 		}
 
-		if (userRequestDTO.password() != null && !userRequestDTO.password().trim().isEmpty()) {
-			// In a real application, you would encode the password
-			// existingUser.setPassword(passwordEncoder.encode(userRequestDTO.password()));
-			existingUser.setPassword(userRequestDTO.password());
-		}
 
 		Users updatedUser = usersRepository.save(existingUser);
 		return mapToResponseDTO(updatedUser);
 	}
 
-	@Transactional public void deleteUser(Long userId) {
+	@Transactional
+	public void deleteUser(UUID userId) {
 		if (userId == null) {
 			throw new IllegalArgumentException("User ID cannot be null");
 		}

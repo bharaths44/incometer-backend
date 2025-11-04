@@ -8,6 +8,7 @@ import org.hibernate.proxy.HibernateProxy;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 
 @Entity
@@ -20,9 +21,9 @@ import java.util.Objects;
 public class Users {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.UUID)
 	@Column(name = "user_id")
-	private Long userId;
+	private UUID userId;
 
 	@Column(nullable = false)
 	private String name;
@@ -32,9 +33,6 @@ public class Users {
 
 	@Column(nullable = false, unique = true)
 	private String phoneNumber;
-
-	@Column(nullable = false)
-	private String password;
 
 	@CreationTimestamp
 	@Column(name = "created_at", nullable = false, updatable = false)

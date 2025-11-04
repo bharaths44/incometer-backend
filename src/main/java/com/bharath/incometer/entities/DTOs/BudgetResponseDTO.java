@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
  */
 public record BudgetResponseDTO(
 	Long budgetId,
-	Long userId,
+	java.util.UUID userId,
 	Long categoryId,
 	String categoryName,
 	BigDecimal amount,

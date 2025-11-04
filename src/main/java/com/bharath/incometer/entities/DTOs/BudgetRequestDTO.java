@@ -7,12 +7,13 @@ import com.bharath.incometer.enums.BudgetType;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 /**
  * DTO for {@link Budget}
  */
 public record BudgetRequestDTO(
-	Long userId,
+	UUID userId,
 	Long categoryId,
 	BigDecimal amount,
 	LocalDate startDate,

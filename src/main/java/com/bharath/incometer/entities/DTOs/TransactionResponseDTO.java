@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
  * DTO for {@link Transaction}
  */
 public record TransactionResponseDTO(Long transactionId,
-                                     Long userUserId,
+                                     java.util.UUID userUserId,
                                      CategoryDto category,
                                      BigDecimal amount,
                                      String description,

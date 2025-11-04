@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/transactions")
@@ -43,7 +44,7 @@ public class TransactionController {
 
 	@GetMapping
 	public ResponseEntity<List<TransactionResponseDTO>> getAllTransactions(
-		@RequestParam Long userId,
+		@RequestParam UUID userId,
 		@RequestParam(required = false) TransactionType type) {
 		try {
 			List<TransactionResponseDTO> response;
@@ -90,7 +91,7 @@ public class TransactionController {
 	// Delete
 	@DeleteMapping("/{userId}/{id}")
 	public ResponseEntity<String> deleteTransaction(
-		@PathVariable Long userId,
+		@PathVariable UUID userId,
 		@PathVariable Long id) {
 		try {
 			transactionService.deleteTransaction(id, userId);
@@ -109,7 +110,7 @@ public class TransactionController {
 
 	@GetMapping("/{userId}/{id}")
 	public ResponseEntity<TransactionResponseDTO> getTransactionById(
-		@PathVariable Long userId,
+		@PathVariable UUID userId,
 		@PathVariable Long id) {
 		try {
 			TransactionResponseDTO response = transactionService.getTransactionById(id, userId);
@@ -128,7 +129,7 @@ public class TransactionController {
 
 	@GetMapping("/{userId}/date-range")
 	public ResponseEntity<List<TransactionResponseDTO>> getTransactionsByDateRange(
-		@PathVariable Long userId,
+		@PathVariable UUID userId,
 		@RequestParam LocalDate startDate,
 		@RequestParam LocalDate endDate,
 		@RequestParam(required = false) TransactionType type) {
