@@ -1,12 +1,11 @@
 package com.bharath.incometer.entities.DTOs;
 
-import jakarta.validation.constraints.NotNull;
-
 import java.time.LocalDateTime;
+import java.util.UUID;
 
-public record UserResponseDTO(java.util.UUID userId,
-                              @NotNull String name,
-                              @NotNull String email,
+public record UserResponseDTO(UUID userId,
+                              String name,
+                              String email,
                               String phoneNumber,
                               LocalDateTime createdAt,
                               LocalDateTime updatedAt) {

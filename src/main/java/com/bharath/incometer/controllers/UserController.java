@@ -134,4 +134,15 @@ public class UserController {
 			throw new RuntimeException("Error retrieving all user stats: " + e.getMessage());
 		}
 	}
+
+	@GetMapping("/me")
+	public ResponseEntity<UserResponseDTO> getCurrentUser() {
+		try {
+			UserResponseDTO user = userService.getCurrentUserDTO();
+			return ResponseEntity.ok(user);
+		} catch (Exception e) {
+			// Return 500 for unexpected errors
+			throw new RuntimeException("Error retrieving current user: " + e.getMessage());
+		}
+	}
 }
