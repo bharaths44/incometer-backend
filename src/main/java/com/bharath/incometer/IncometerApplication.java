@@ -17,6 +17,8 @@ public class IncometerApplication {
 		System.setProperty("DB_URL", Objects.requireNonNull(dotenv.get("DB_URL")));
 		System.setProperty("DB_PASSWORD", Objects.requireNonNull(dotenv.get("DB_PASSWORD")));
 		System.setProperty("GEMINI_API_KEY", Objects.requireNonNull(dotenv.get("GEMINI_API_KEY")));
+		System.setProperty("GOOGLE_CLIENT_ID", Objects.requireNonNull(dotenv.get("GOOGLE_CLIENT_ID")));
+		System.setProperty("GOOGLE_CLIENT_SECRET", Objects.requireNonNull(dotenv.get("GOOGLE_CLIENT_SECRET")));
 		SpringApplication.run(IncometerApplication.class, args);
 	}
 
