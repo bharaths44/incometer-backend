@@ -41,6 +41,7 @@ public class JwtService {
 	public String generateToken(Users user) {
 		Map<String, Object> extraClaims = new HashMap<>();
 		extraClaims.put("uuid", user.getUserId().toString());
+		extraClaims.put("name", user.getName());
 		System.out.println("Generating token for Users with uuid: " + user.getUserId());
 		return generateToken(extraClaims, user);
 	}
@@ -48,6 +49,7 @@ public class JwtService {
 	public String generateToken(com.bharath.incometer.models.user.UserPrincipal userPrincipal) {
 		Map<String, Object> extraClaims = new HashMap<>();
 		extraClaims.put("uuid", userPrincipal.getId().toString());
+		extraClaims.put("name", userPrincipal.getUserName());
 		System.out.println("Generating token for UserPrincipal with uuid: " + userPrincipal.getId());
 		return generateToken(extraClaims, userPrincipal);
 	}
@@ -90,6 +92,7 @@ public class JwtService {
 	public String generateRefreshToken(Users user) {
 		Map<String, Object> extraClaims = new HashMap<>();
 		extraClaims.put("uuid", user.getUserId().toString());
+		extraClaims.put("name", user.getName());
 		return buildToken(extraClaims, user, refreshExpiration);
 	}
 

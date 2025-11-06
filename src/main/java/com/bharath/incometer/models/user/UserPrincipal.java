@@ -18,6 +18,7 @@ public class UserPrincipal implements OAuth2User, OidcUser, UserDetails {
 	private final UUID id;
 	@Getter
 	private final String email;
+	private final String name;
 	private final String password;
 	private final Collection<? extends GrantedAuthority> authorities;
 	@Setter
@@ -25,9 +26,11 @@ public class UserPrincipal implements OAuth2User, OidcUser, UserDetails {
 	@Setter
 	private Map<String, Object> claims;
 
-	public UserPrincipal(UUID id, String email, String password, Collection<? extends GrantedAuthority> authorities) {
+	public UserPrincipal(UUID id, String email, String name, String password,
+	                     Collection<? extends GrantedAuthority> authorities) {
 		this.id = id;
 		this.email = email;
+		this.name = name;
 		this.password = password;
 		this.authorities = authorities;
 	}
@@ -35,7 +38,7 @@ public class UserPrincipal implements OAuth2User, OidcUser, UserDetails {
 	public static UserPrincipal create(Users user) {
 		List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
 
-		return new UserPrincipal(user.getUserId(), user.getEmail(), user.getPassword(), authorities);
+		return new UserPrincipal(user.getUserId(), user.getEmail(), user.getName(), user.getPassword(), authorities);
 	}
 
 	public static UserPrincipal create(Users user, Map<String, Object> attributes) {
@@ -67,6 +70,10 @@ public class UserPrincipal implements OAuth2User, OidcUser, UserDetails {
 	@Override
 	public String getName() {
 		return String.valueOf(id);
+	}
+
+	public String getUserName() {
+		return name;
 	}
 
 	// OidcUser specific methods
