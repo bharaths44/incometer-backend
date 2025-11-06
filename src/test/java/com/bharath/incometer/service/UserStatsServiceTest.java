@@ -2,6 +2,9 @@ package com.bharath.incometer.service;
 
 import com.bharath.incometer.entities.DTOs.UserStatsResponseDTO;
 import com.bharath.incometer.entities.UserStats;
+import com.bharath.incometer.entities.Users;
+import com.bharath.incometer.enums.AuthProvider;
+import com.bharath.incometer.enums.Role;
 import com.bharath.incometer.repository.UserStatsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,16 +12,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,15 +34,30 @@ class UserStatsServiceTest {
 	@Mock
 	private UserStatsRepository userStatsRepository;
 
+	@Mock
+	private AuthService authService;
+
 	@InjectMocks
 	private UserService userService;
 
 	private UserStats mockUserStats;
 	private UUID testUserId;
+	private Jwt mockJwt;
 
 	@BeforeEach
 	void setUp() {
 		testUserId = UUID.randomUUID();
+
+		// Create test user
+		Users testUser = new Users();
+		testUser.setUserId(testUserId);
+		testUser.setName("Test User");
+		testUser.setEmail("test@example.com");
+		testUser.setRole(Role.USER);
+		testUser.setProvider(AuthProvider.local);
+		testUser.setCreatedAt(LocalDateTime.now());
+		testUser.setUpdatedAt(LocalDateTime.now());
+
 		mockUserStats = new UserStats(testUserId,
 		                              "Test User",
 		                              "test@example.com",
@@ -59,6 +81,52 @@ class UserStatsServiceTest {
 		                              LocalDateTime.now()
 		                              // lastTransactionDate
 		);
+
+		// Create mock JWT
+		mockJwt = Jwt.withTokenValue("mock-token").header("alg", "RS256").claim("sub", testUserId.toString()).build();
+
+		// Set up security context with JWT
+		SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+		Authentication authentication = new Authentication() {
+			@Override
+			public Collection<? extends GrantedAuthority> getAuthorities() {
+				return Collections.emptyList();
+			}
+
+			@Override
+			public Object getCredentials() {
+				return null;
+			}
+
+			@Override
+			public Object getDetails() {
+				return null;
+			}
+
+			@Override
+			public Object getPrincipal() {
+				return mockJwt;
+			}
+
+			@Override
+			public boolean isAuthenticated() {
+				return true;
+			}
+
+			@Override
+			public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
+			}
+
+			@Override
+			public String getName() {
+				return testUserId.toString();
+			}
+		};
+		securityContext.setAuthentication(authentication);
+		SecurityContextHolder.setContext(securityContext);
+
+		// Mock auth service - lenient because not all tests need authentication
+		lenient().when(authService.getAuthenticatedUser(mockJwt)).thenReturn(testUser);
 	}
 
 	@Test
@@ -85,13 +153,13 @@ class UserStatsServiceTest {
 
 	@Test
 	void testGetUserStats_UserNotFound() {
-		// Given
+		// Given - trying to access another user's stats without admin role
 		UUID nonExistentUserId = UUID.randomUUID();
-		when(userStatsRepository.findById(nonExistentUserId)).thenReturn(Optional.empty());
+		lenient().when(userStatsRepository.findById(nonExistentUserId)).thenReturn(Optional.empty());
 
-		// When & Then
-		assertThatThrownBy(() -> userService.getUserStats(nonExistentUserId)).isInstanceOf(RuntimeException.class)
-		                                                                     .hasMessageContaining("User not found");
+		// When & Then - should get access denied because user can't view other user's stats
+		assertThatThrownBy(() -> userService.getUserStats(nonExistentUserId)).isInstanceOf(AccessDeniedException.class)
+		                                                                     .hasMessageContaining("Access denied");
 	}
 
 	@Test
@@ -103,7 +171,7 @@ class UserStatsServiceTest {
 
 	@Test
 	void testGetAllUserStats_Success() {
-		// Given
+		// Given - non-admin user should get access denied
 		UserStats secondUserStats = new UserStats(UUID.randomUUID(),
 		                                          "Second User",
 		                                          "second@example.com",
@@ -119,28 +187,22 @@ class UserStatsServiceTest {
 		                                          LocalDateTime.now());
 
 		List<UserStats> mockStatsList = Arrays.asList(mockUserStats, secondUserStats);
-		when(userStatsRepository.findAll()).thenReturn(mockStatsList);
+		lenient().when(userStatsRepository.findAll()).thenReturn(mockStatsList);
 
-		// When
-		List<UserStatsResponseDTO> result = userService.getAllUserStats();
-
-		// Then
-		assertThat(result).isNotNull();
-		assertThat(result).hasSize(2);
-		assertThat(result.get(0).userName()).isEqualTo("Test User");
-		assertThat(result.get(1).userName()).isEqualTo("Second User");
+		// When & Then - should get access denied because only admins can view all stats
+		assertThatThrownBy(() -> userService.getAllUserStats()).isInstanceOf(AccessDeniedException.class)
+		                                                       .hasMessageContaining(
+			                                                       "Access denied: admin role required");
 	}
 
 	@Test
 	void testGetAllUserStats_EmptyList() {
-		// Given
-		when(userStatsRepository.findAll()).thenReturn(List.of());
+		// Given - non-admin user should get access denied
+		lenient().when(userStatsRepository.findAll()).thenReturn(List.of());
 
-		// When
-		List<UserStatsResponseDTO> result = userService.getAllUserStats();
-
-		// Then
-		assertThat(result).isNotNull();
-		assertThat(result).isEmpty();
+		// When & Then - should get access denied because only admins can view all stats
+		assertThatThrownBy(() -> userService.getAllUserStats()).isInstanceOf(AccessDeniedException.class)
+		                                                       .hasMessageContaining(
+			                                                       "Access denied: admin role required");
 	}
 }
