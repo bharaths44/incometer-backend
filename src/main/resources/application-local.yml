@@ -7,8 +7,8 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop
-    show-sql: false
+      ddl-auto: update
+    show-sql: true
     properties:
       hibernate:
         format_sql: true
@@ -22,12 +22,12 @@ spring:
           google:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
-            redirect-uri: ${GOOGLE_REDIRECT_URI}
+            redirect-uri: http://localhost:8080/oauth2/callback/google
             scope: openid,email,profile
 
 app:
   oauth2:
-    authorizedRedirectUris: ${APP_AUTHORIZED_REDIRECT_URIS}
+    authorizedRedirectUris: http://localhost:3000/auth/callback
 
 server:
   port: 8080
@@ -35,9 +35,11 @@ server:
 logging:
   level:
     org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer: ERROR
+    org.springframework.security: DEBUG
 
 jwt:
   secret: mySecretKeyForJWTWhichShouldBeLongEnoughToBeSecure
   expiration: 86400000  # 24 hours in milliseconds
   refresh-token:
     expiration: 604800000 # 7 days
+
