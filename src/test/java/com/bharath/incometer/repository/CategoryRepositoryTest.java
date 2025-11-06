@@ -46,6 +46,7 @@ public class CategoryRepositoryTest {
 		Category c = new Category();
 		c.setUser(user);
 		c.setName("Food");
+		c.setIcon("utensils");
 		c.setType(TransactionType.EXPENSE);
 		categoryRepository.save(c);
 	}
@@ -60,8 +61,9 @@ public class CategoryRepositoryTest {
 
 	@Test
 	void testExistsByUserUserIdAndNameAndType() {
-		boolean exists = categoryRepository.existsByUserUserIdAndNameAndType(
-			user.getUserId(), "Food", TransactionType.EXPENSE);
+		boolean exists = categoryRepository.existsByUserUserIdAndNameAndType(user.getUserId(),
+		                                                                     "Food",
+		                                                                     TransactionType.EXPENSE);
 
 		assertTrue(exists);
 	}
