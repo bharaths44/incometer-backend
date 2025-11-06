@@ -11,7 +11,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/payment-methods")
-@CrossOrigin(origins = "http://localhost:5173") // enable dev frontend access
 @RequiredArgsConstructor
 public class PaymentMethodController {
 
