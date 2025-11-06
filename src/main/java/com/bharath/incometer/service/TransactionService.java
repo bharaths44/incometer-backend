@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -176,7 +177,7 @@ public class TransactionService {
 	}
 
 	@Transactional
-	public void deleteTransaction(Long id, Long userId) {
+	public void deleteTransaction(Long id, UUID userId) {
 		if (id == null) {
 			throw new IllegalArgumentException("Transaction ID cannot be null");
 		}
@@ -198,7 +199,7 @@ public class TransactionService {
 	}
 
 	@Transactional(readOnly = true)
-	public TransactionResponseDTO getTransactionById(Long id, Long userId) {
+	public TransactionResponseDTO getTransactionById(Long id, UUID userId) {
 		if (id == null) {
 			throw new IllegalArgumentException("Transaction ID cannot be null");
 		}
@@ -216,7 +217,7 @@ public class TransactionService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<TransactionResponseDTO> getTransactionsByUserId(Long userId) {
+	public List<TransactionResponseDTO> getTransactionsByUserId(UUID userId) {
 		if (userId == null) {
 			throw new IllegalArgumentException("User ID cannot be null");
 		}
@@ -225,7 +226,7 @@ public class TransactionService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<TransactionResponseDTO> getTransactionsByUserIdAndType(Long userId, TransactionType transactionType) {
+	public List<TransactionResponseDTO> getTransactionsByUserIdAndType(UUID userId, TransactionType transactionType) {
 		if (userId == null) {
 			throw new IllegalArgumentException("User ID cannot be null");
 		}
@@ -241,7 +242,7 @@ public class TransactionService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<TransactionResponseDTO> getTransactionsByUserIdAndDateRange(Long userId, LocalDate startDate,
+	public List<TransactionResponseDTO> getTransactionsByUserIdAndDateRange(UUID userId, LocalDate startDate,
 	                                                                        LocalDate endDate) {
 
 		if (userId == null) {
@@ -263,7 +264,7 @@ public class TransactionService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<TransactionResponseDTO> getTransactionsByUserIdAndTypeAndDateRange(Long userId,
+	public List<TransactionResponseDTO> getTransactionsByUserIdAndTypeAndDateRange(UUID userId,
 	                                                                               TransactionType transactionType,
 	                                                                               LocalDate startDate,
 	                                                                               LocalDate endDate) {
@@ -294,7 +295,7 @@ public class TransactionService {
 	}
 
 	@Transactional(readOnly = true)
-	public BigDecimal getTotalAmountByUserId(Long userId) {
+	public BigDecimal getTotalAmountByUserId(UUID userId) {
 		if (userId == null) {
 			throw new IllegalArgumentException("User ID cannot be null");
 		}
@@ -303,7 +304,7 @@ public class TransactionService {
 	}
 
 	@Transactional(readOnly = true)
-	public BigDecimal getTotalAmountByUserIdAndType(Long userId, TransactionType transactionType) {
+	public BigDecimal getTotalAmountByUserIdAndType(UUID userId, TransactionType transactionType) {
 		if (userId == null) {
 			throw new IllegalArgumentException("User ID cannot be null");
 		}

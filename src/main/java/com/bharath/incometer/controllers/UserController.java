@@ -2,12 +2,14 @@ package com.bharath.incometer.controllers;
 
 import com.bharath.incometer.entities.DTOs.UserRequestDTO;
 import com.bharath.incometer.entities.DTOs.UserResponseDTO;
+import com.bharath.incometer.entities.DTOs.UserStatsResponseDTO;
 import com.bharath.incometer.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/users")
@@ -20,7 +22,8 @@ public class UserController {
 	}
 
 	@PostMapping
-	public ResponseEntity<UserResponseDTO> createUser(@RequestBody UserRequestDTO userRequestDTO) {
+	public ResponseEntity<UserResponseDTO> createUser(
+		@RequestBody UserRequestDTO userRequestDTO) {
 		try {
 			UserResponseDTO createdUser = userService.createUser(userRequestDTO);
 			return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
@@ -35,7 +38,8 @@ public class UserController {
 
 
 	@GetMapping("/{userId}")
-	public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long userId) {
+	public ResponseEntity<UserResponseDTO> getUserById(
+		@PathVariable UUID userId) {
 		try {
 			UserResponseDTO user = userService.getUserById(userId);
 			return ResponseEntity.ok(user);
@@ -53,8 +57,9 @@ public class UserController {
 
 
 	@PutMapping("/{userId}")
-	public ResponseEntity<UserResponseDTO> updateUser(@PathVariable Long userId,
-	                                                  @RequestBody UserRequestDTO userRequestDTO) {
+	public ResponseEntity<UserResponseDTO> updateUser(
+		@PathVariable UUID userId,
+		@RequestBody UserRequestDTO userRequestDTO) {
 		try {
 			UserResponseDTO updatedUser = userService.updateUser(userId, userRequestDTO);
 			return ResponseEntity.ok(updatedUser);
@@ -71,7 +76,8 @@ public class UserController {
 	}
 
 	@DeleteMapping("/{userId}")
-	public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
+	public ResponseEntity<Void> deleteUser(
+		@PathVariable UUID userId) {
 		try {
 			userService.deleteUser(userId);
 			return ResponseEntity.noContent().build();
@@ -95,6 +101,48 @@ public class UserController {
 		} catch (Exception e) {
 			// Return 500 for unexpected errors
 			throw new RuntimeException("Error retrieving users: " + e.getMessage());
+		}
+	}
+
+
+	@GetMapping("/{userId}/stats")
+	public ResponseEntity<UserStatsResponseDTO> getUserStats(
+		@PathVariable UUID userId) {
+		try {
+			UserStatsResponseDTO stats = userService.getUserStats(userId);
+			return ResponseEntity.ok(stats);
+		} catch (IllegalArgumentException e) {
+			// Return 400 Bad Request for validation errors
+			throw e;
+		} catch (RuntimeException e) {
+			// Return 404 Not Found for user not found
+			throw e;
+		} catch (Exception e) {
+			// Return 500 for unexpected errors
+			throw new RuntimeException("Error retrieving user stats: " + e.getMessage());
+		}
+	}
+
+
+	@GetMapping("/stats")
+	public ResponseEntity<List<UserStatsResponseDTO>> getAllUserStats() {
+		try {
+			List<UserStatsResponseDTO> stats = userService.getAllUserStats();
+			return ResponseEntity.ok(stats);
+		} catch (Exception e) {
+			// Return 500 for unexpected errors
+			throw new RuntimeException("Error retrieving all user stats: " + e.getMessage());
+		}
+	}
+
+	@GetMapping("/me")
+	public ResponseEntity<UserResponseDTO> getCurrentUser() {
+		try {
+			UserResponseDTO user = userService.getCurrentUserDTO();
+			return ResponseEntity.ok(user);
+		} catch (Exception e) {
+			// Return 500 for unexpected errors
+			throw new RuntimeException("Error retrieving current user: " + e.getMessage());
 		}
 	}
 }

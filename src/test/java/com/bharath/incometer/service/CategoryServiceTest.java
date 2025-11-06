@@ -3,8 +3,8 @@ package com.bharath.incometer.service;
 import com.bharath.incometer.entities.Category;
 import com.bharath.incometer.entities.DTOs.CategoryRequestDTO;
 import com.bharath.incometer.entities.DTOs.CategoryResponseDTO;
-import com.bharath.incometer.enums.TransactionType;
 import com.bharath.incometer.entities.Users;
+import com.bharath.incometer.enums.TransactionType;
 import com.bharath.incometer.repository.CategoryRepository;
 import com.bharath.incometer.repository.UsersRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,11 +42,10 @@ public class CategoryServiceTest {
 	@BeforeEach
 	void setUp() {
 		user = new Users();
-		user.setUserId(1L);
+		user.setUserId(UUID.fromString("550e8400-e29b-41d4-a716-446655440000"));
 		user.setName("Test User");
 		user.setEmail("test@example.com");
 		user.setPhoneNumber("1234567890");
-		user.setPassword("password");
 
 		category = new Category();
 		category.setCategoryId(1L);
@@ -58,16 +58,19 @@ public class CategoryServiceTest {
 
 	@Test
 	void testAddCategory() {
-		CategoryRequestDTO request = new CategoryRequestDTO(1L, "Food", "utensils", TransactionType.EXPENSE);
-		when(usersRepository.findById(1L)).thenReturn(Optional.of(user));
-		when(categoryRepository.existsByUserUserIdAndNameAndType(1L,
-		                                                         "Food",
-		                                                         TransactionType.EXPENSE)).thenReturn(false);
+		CategoryRequestDTO request = new CategoryRequestDTO(UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),
+		                                                    "Food",
+		                                                    "utensils",
+		                                                    TransactionType.EXPENSE);
+		when(usersRepository.findById(UUID.fromString("550e8400-e29b-41d4-a716-446655440000"))).thenReturn(Optional.of(
+			user));
+		when(categoryRepository.existsByUserUserIdAndNameAndType(UUID.fromString(
+			"550e8400-e29b-41d4-a716" + "-446655440000"), "Food", TransactionType.EXPENSE)).thenReturn(false);
 		when(categoryRepository.save(any(Category.class))).thenReturn(category);
 
 		System.out.println("Input: " + request);
 		CategoryResponseDTO expected = new CategoryResponseDTO(1L,
-		                                                       1L,
+		                                                       UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),
 		                                                       "Food",
 		                                                       "utensils",
 		                                                       TransactionType.EXPENSE,
@@ -86,18 +89,22 @@ public class CategoryServiceTest {
 
 	@Test
 	void testGetCategoriesByUserId() {
-		when(categoryRepository.findByUserUserId(1L)).thenReturn(Collections.singletonList(category));
+		when(categoryRepository.findByUserUserId(UUID.fromString("550e8400-e29b-41d4-a716-446655440000"))).thenReturn(
+			Collections.singletonList(category));
 
 		System.out.println("Input: userId=1L");
 		List<CategoryResponseDTO> expected = List.of(new CategoryResponseDTO(1L,
-		                                                                     1L,
+		                                                                     UUID.fromString(
+			                                                                     "550e8400-e29b-41d4" + "-a716" +
+			                                                                     "-446655440000"),
 		                                                                     "Food",
 		                                                                     "utensils",
 		                                                                     TransactionType.EXPENSE,
 		                                                                     category.getCreatedAt()));
 		System.out.println("Expected: " + expected);
 
-		List<CategoryResponseDTO> result = categoryService.getCategoriesByUserId(1L);
+		List<CategoryResponseDTO> result = categoryService.getCategoriesByUserId(UUID.fromString(
+			"550e8400-e29b-41d4-a716-446655440000"));
 		System.out.println("Real Output: " + result);
 
 		assertEquals(1, result.size());
@@ -107,13 +114,15 @@ public class CategoryServiceTest {
 
 	@Test
 	void testGetCategoryIdByName() {
-		when(categoryRepository.findByUserUserIdAndNameIgnoreCase(1L, "food")).thenReturn(category);
+		when(categoryRepository.findByUserUserIdAndNameIgnoreCase(UUID.fromString(
+			"550e8400-e29b-41d4-a716" + "-446655440000"), "food")).thenReturn(category);
 
 		System.out.println("Input: categoryName='food', userId=1L");
 		Long expected = 1L;
 		System.out.println("Expected: " + expected);
 
-		Long result = categoryService.getCategoryIdByName("food", 1L);
+		Long result = categoryService.getCategoryIdByName("food",
+		                                                  UUID.fromString("550e8400-e29b-41d4-a716-446655440000"));
 		System.out.println("Real Output: " + result);
 
 		assertEquals(expected, result);
@@ -121,14 +130,17 @@ public class CategoryServiceTest {
 
 	@Test
 	void testCreateCategoryForUser() {
-		when(usersRepository.findById(1L)).thenReturn(Optional.of(user));
+		when(usersRepository.findById(UUID.fromString("550e8400-e29b-41d4-a716-446655440000"))).thenReturn(Optional.of(
+			user));
 		when(categoryRepository.save(any(Category.class))).thenReturn(category);
 
 		System.out.println("Input: categoryName='food', userId=1L, type=EXPENSE");
 		Long expected = 1L;
 		System.out.println("Expected: " + expected);
 
-		Long result = categoryService.createCategoryForUser("food", 1L, TransactionType.EXPENSE);
+		Long result = categoryService.createCategoryForUser("food",
+		                                                    UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),
+		                                                    TransactionType.EXPENSE);
 		System.out.println("Real Output: " + result);
 
 		assertEquals(expected, result);

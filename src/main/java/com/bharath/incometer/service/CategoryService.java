@@ -4,6 +4,7 @@ import com.bharath.incometer.entities.Category;
 import com.bharath.incometer.entities.DTOs.CategoryRequestDTO;
 import com.bharath.incometer.entities.DTOs.CategoryResponseDTO;
 import com.bharath.incometer.enums.TransactionType;
+import com.bharath.incometer.repository.BudgetRepository;
 import com.bharath.incometer.repository.CategoryRepository;
 import com.bharath.incometer.repository.TransactionRepository;
 import com.bharath.incometer.repository.UsersRepository;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -19,13 +21,16 @@ public class CategoryService {
 	private final TransactionRepository transactionRepository;
 	private final CategoryRepository categoryRepository;
 	private final UsersRepository usersRepository;
+	private final BudgetRepository budgetRepository;
 
 	public CategoryService(TransactionRepository transactionRepository,
 	                       CategoryRepository categoryRepository,
-	                       UsersRepository usersRepository) {
+	                       UsersRepository usersRepository,
+	                       BudgetRepository budgetRepository) {
 		this.transactionRepository = transactionRepository;
 		this.categoryRepository = categoryRepository;
 		this.usersRepository = usersRepository;
+		this.budgetRepository = budgetRepository;
 	}
 
 	private CategoryResponseDTO toDTO(Category category) {
@@ -89,7 +94,7 @@ public class CategoryService {
 	}
 
 	@Transactional
-	public void deleteCategory(Long id, Long userId) {
+	public void deleteCategory(Long id, UUID userId) {
 		if (id == null) {
 			throw new IllegalArgumentException("Category ID cannot be null");
 		}
@@ -106,12 +111,13 @@ public class CategoryService {
 			throw new RuntimeException("User does not have permission to delete this category");
 		}
 
-		// Check if category has associated expenses
-		boolean hasExpenses = transactionRepository.existsByCategoryCategoryId(id);
-		if (hasExpenses) {
-			throw new RuntimeException("Cannot delete category with associated expenses");
-		}
+		// Delete associated budgets
+		budgetRepository.deleteByCategoryId(id);
 
+		// Delete associated transactions
+		transactionRepository.deleteByCategoryId(id);
+
+		// Delete the category
 		categoryRepository.delete(existingCategory);
 	}
 
@@ -129,7 +135,7 @@ public class CategoryService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<CategoryResponseDTO> getCategoriesByUserId(Long userId) {
+	public List<CategoryResponseDTO> getCategoriesByUserId(UUID userId) {
 		if (userId == null) {
 			throw new IllegalArgumentException("User ID cannot be null");
 		}
@@ -137,25 +143,19 @@ public class CategoryService {
 		return categoryRepository.findByUserUserId(userId).stream().map(this::toDTO).collect(Collectors.toList());
 	}
 
-	public Long getCategoryIdByName(String categoryName, Long userId) {
+	public Long getCategoryIdByName(String categoryName, UUID userId) {
 		Category category = categoryRepository.findByUserUserIdAndNameIgnoreCase(userId, categoryName);
 		return category != null ? category.getCategoryId() : null;
 	}
 
-	public List<String> getAllCategoryNamesForUser(Long userId) {
-		// Get user categories
-		List<Category> userCategories = categoryRepository.findByUserUserId(userId);
-		return userCategories.stream().map(Category::getName).collect(Collectors.toList());
-	}
-
-	public List<String> getAllCategoryNamesForUserByType(Long userId, TransactionType type) {
+	public List<String> getAllCategoryNamesForUserByType(UUID userId, TransactionType type) {
 		// Get user categories by type
 		List<Category> userCategories = categoryRepository.findByUserUserIdAndType(userId, type);
 		return userCategories.stream().map(Category::getName).collect(Collectors.toList());
 	}
 
 	@Transactional
-	public Long createCategoryForUser(String categoryName, Long userId, TransactionType type) {
+	public Long createCategoryForUser(String categoryName, UUID userId, TransactionType type) {
 		Category category = new Category();
 		category.setName(capitalize(categoryName));
 		category.setIcon("circle"); // Default icon

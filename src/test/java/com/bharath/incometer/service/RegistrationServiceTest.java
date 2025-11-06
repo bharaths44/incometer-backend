@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,11 +36,10 @@ public class RegistrationServiceTest {
 	void setUp() {
 
 		user = new Users();
-		user.setUserId(1L);
+		user.setUserId(UUID.fromString("550e8400-e29b-41d4-a716-446655440000"));
 		user.setName("Test User");
 		user.setEmail("1234567890@whatsapp.local");
 		user.setPhoneNumber("1234567890");
-		user.setPassword("whatsapp");
 		user.setCreatedAt(LocalDateTime.now());
 		user.setUpdatedAt(LocalDateTime.now());
 	}
@@ -49,12 +49,12 @@ public class RegistrationServiceTest {
 		String phoneNumber = "1234567890";
 		String name = "Test User";
 		when(usersRepository.existsByPhoneNumber(phoneNumber)).thenReturn(false);
-		UserResponseDTO response = new UserResponseDTO(1L,
-													   "Test User",
-													   "1234567890@whatsapp.local",
-													   "1234567890",
-													   user.getCreatedAt(),
-													   user.getUpdatedAt());
+		UserResponseDTO response = new UserResponseDTO(UUID.fromString("550e8400-e29b-41d4-a716-446655440000"),
+		                                               "Test User",
+		                                               "1234567890@whatsapp.local",
+		                                               "1234567890",
+		                                               user.getCreatedAt(),
+		                                               user.getUpdatedAt());
 		when(userService.createUser(any(UserRequestDTO.class))).thenReturn(response);
 
 		System.out.println("Input: phoneNumber='" + phoneNumber + "', name='" + name + "'");

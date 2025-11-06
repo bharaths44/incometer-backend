@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/categories")
@@ -75,7 +76,7 @@ public class CategoryController {
 
 	@DeleteMapping("/{userId}/{id}")
 	public ResponseEntity<String> deleteCategory(
-		@PathVariable Long userId,
+		@PathVariable UUID userId,
 		@PathVariable Long id) {
 		try {
 			categoryService.deleteCategory(id, userId);
@@ -112,7 +113,7 @@ public class CategoryController {
 
 	@GetMapping("/user/{userId}")
 	public ResponseEntity<List<CategoryResponseDTO>> getCategoriesByUserId(
-		@PathVariable Long userId) {
+		@PathVariable UUID userId) {
 		try {
 			return ResponseEntity.ok(categoryService.getCategoriesByUserId(userId));
 		} catch (IllegalArgumentException e) {

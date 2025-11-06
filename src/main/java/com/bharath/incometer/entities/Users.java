@@ -1,13 +1,21 @@
 package com.bharath.incometer.entities;
 
+import com.bharath.incometer.enums.AuthProvider;
+import com.bharath.incometer.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 
 @Entity
@@ -17,12 +25,12 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users")
-public class Users {
+public class Users implements UserDetails {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.UUID)
 	@Column(name = "user_id")
-	private Long userId;
+	private UUID userId;
 
 	@Column(nullable = false)
 	private String name;
@@ -30,11 +38,18 @@ public class Users {
 	@Column(nullable = false, unique = true)
 	private String email;
 
-	@Column(nullable = false, unique = true)
+	@Column(unique = true)
 	private String phoneNumber;
 
-	@Column(nullable = false)
+
+	@Column()
 	private String password;
+
+	@Enumerated(EnumType.STRING)
+	private Role role;
+
+	@Enumerated(EnumType.STRING)
+	private AuthProvider provider;
 
 	@CreationTimestamp
 	@Column(name = "created_at", nullable = false, updatable = false)
@@ -67,5 +82,14 @@ public class Users {
 		                                                               .getPersistentClass()
 		                                                               .hashCode() : getClass().hashCode();
 	}
-}
 
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		return List.of(new SimpleGrantedAuthority(role.name()));
+	}
+
+	@Override
+	public String getUsername() {
+		return email;
+	}
+}

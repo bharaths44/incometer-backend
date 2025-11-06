@@ -6,6 +6,7 @@ import com.bharath.incometer.entities.PaymentMethod;
 import com.bharath.incometer.entities.Users;
 import com.bharath.incometer.enums.PaymentType;
 import com.bharath.incometer.repository.PaymentMethodRepository;
+import com.bharath.incometer.repository.TransactionRepository;
 import com.bharath.incometer.repository.UsersRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -21,9 +23,10 @@ public class PaymentMethodService {
 
 	private final PaymentMethodRepository repository;
 	private final UsersRepository usersRepository;
+	private final TransactionRepository transactionRepository;
 
 
-	public PaymentMethod savePaymentMethod(PaymentMethod paymentMethod, Long userId) {
+	public PaymentMethod savePaymentMethod(PaymentMethod paymentMethod, UUID userId) {
 		if (userId != null) {
 			Users user = usersRepository.findById(userId).orElse(null);
 			paymentMethod.setUser(user);
@@ -45,11 +48,11 @@ public class PaymentMethodService {
 
 
 	@Transactional()
-	public List<PaymentMethodResponseDTO> getByUserId(Long userId) {
+	public List<PaymentMethodResponseDTO> getByUserId(UUID userId) {
 		return repository.findByUserUserId(userId).stream().map(this::toDTO).toList();
 	}
 
-	public PaymentMethod updatePaymentMethod(Long id, PaymentMethod update, Long userId) {
+	public PaymentMethod updatePaymentMethod(Long id, PaymentMethod update, UUID userId) {
 		PaymentMethod existing = repository.findById(id)
 		                                   .orElseThrow(() -> new IllegalArgumentException(
 			                                   "PaymentMethod not found: " + id));
@@ -68,11 +71,13 @@ public class PaymentMethodService {
 
 
 	public void delete(Long id) {
+		// Delete associated transactions first
+		transactionRepository.deleteByPaymentMethodPaymentMethodId(id);
 		repository.deleteById(id);
 	}
 
 
-	public PaymentMethod findOrCreateByName(Long userId, String name) {
+	public PaymentMethod findOrCreateByName(UUID userId, String name) {
 		if (name == null || name.trim().isEmpty()) {
 			// Default to Cash or something
 			name = "Cash";
@@ -125,13 +130,13 @@ public class PaymentMethodService {
 		return pm;
 	}
 
-	public PaymentMethodResponseDTO create(PaymentMethodRequestDTO dto, Long userId) {
+	public PaymentMethodResponseDTO create(PaymentMethodRequestDTO dto, UUID userId) {
 		PaymentMethod entity = toEntity(dto);
 		PaymentMethod created = savePaymentMethod(entity, userId);
 		return toDTO(created);
 	}
 
-	public PaymentMethodResponseDTO update(Long id, PaymentMethodRequestDTO dto, Long userId) {
+	public PaymentMethodResponseDTO update(Long id, PaymentMethodRequestDTO dto, UUID userId) {
 		PaymentMethod entity = toEntity(dto);
 		PaymentMethod updated = updatePaymentMethod(id, entity, userId);
 		return toDTO(updated);
