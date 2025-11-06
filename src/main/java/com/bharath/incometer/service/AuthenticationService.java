@@ -4,6 +4,7 @@ import com.bharath.incometer.entities.Users;
 import com.bharath.incometer.enums.Role;
 import com.bharath.incometer.models.AuthenticationResponse;
 import com.bharath.incometer.models.LoginRequest;
+import com.bharath.incometer.models.RefreshRequest;
 import com.bharath.incometer.models.RegisterRequest;
 import com.bharath.incometer.repository.UsersRepository;
 import jakarta.servlet.http.Cookie;
@@ -30,9 +31,13 @@ public class AuthenticationService {
 		user.setRole(Role.USER);
 		repository.save(user);
 		var jwtToken = jwtService.generateToken(user);
+		var refreshToken = jwtService.generateRefreshToken(user);
 		Cookie cookie = new Cookie("token", jwtToken);
 		response.addCookie(cookie);
-		return AuthenticationResponse.builder().accessToken(jwtToken).build();
+		return AuthenticationResponse.builder()
+		                             .accessToken(jwtToken)
+		                             .refreshToken(refreshToken)
+		                             .build();
 	}
 
 	public AuthenticationResponse authenticate(LoginRequest request, HttpServletResponse response) {
@@ -46,8 +51,29 @@ public class AuthenticationService {
 		                                                                           request.getPassword()));
 		System.out.println("Authentication successful for: " + request.getEmail());
 		var jwtToken = jwtService.generateToken(user);
+		var refreshToken = jwtService.generateRefreshToken(user);
 		Cookie cookie = new Cookie("token", jwtToken);
 		response.addCookie(cookie);
-		return AuthenticationResponse.builder().accessToken(jwtToken).build();
+		return AuthenticationResponse.builder()
+		                             .accessToken(jwtToken)
+		                             .refreshToken(refreshToken)
+		                             .build();
+	}
+
+	public AuthenticationResponse refresh(RefreshRequest request) {
+		String refreshToken = request.getRefreshToken();
+		String username = jwtService.extractUsername(refreshToken);
+		var user = repository.findByEmail(username)
+		                     .orElseThrow(() -> new RuntimeException("User not found"));
+		if (jwtService.isTokenValid(refreshToken, user)) {
+			var newAccessToken = jwtService.generateToken(user);
+			var newRefreshToken = jwtService.generateRefreshToken(user); // Optional: rotate refresh token
+			return AuthenticationResponse.builder()
+			                             .accessToken(newAccessToken)
+			                             .refreshToken(newRefreshToken)
+			                             .build();
+		} else {
+			throw new RuntimeException("Invalid refresh token");
+		}
 	}
 }

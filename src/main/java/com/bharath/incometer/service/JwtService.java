@@ -87,4 +87,10 @@ public class JwtService {
 		return Keys.hmacShaKeyFor(secretKey.getBytes());
 	}
 
+	public String generateRefreshToken(Users user) {
+		Map<String, Object> extraClaims = new HashMap<>();
+		extraClaims.put("uuid", user.getUserId().toString());
+		return buildToken(extraClaims, user, refreshExpiration);
+	}
+
 }

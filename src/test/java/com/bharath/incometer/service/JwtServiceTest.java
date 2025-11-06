@@ -105,4 +105,16 @@ public class JwtServiceTest {
 		// Then
 		assertEquals(testUser.getUserId().toString(), uuid);
 	}
+
+	@Test
+	void shouldGenerateRefreshTokenForUser() {
+		// When
+		String refreshToken = jwtService.generateRefreshToken(testUser);
+
+		// Then
+		assertNotNull(refreshToken);
+		assertFalse(refreshToken.isEmpty());
+		assertTrue(refreshToken.contains("."));
+		assertTrue(jwtService.isTokenValid(refreshToken, testUserPrincipal));
+	}
 }
