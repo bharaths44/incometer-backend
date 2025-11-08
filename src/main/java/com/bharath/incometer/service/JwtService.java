@@ -96,4 +96,10 @@ public class JwtService {
 		return buildToken(extraClaims, user, refreshExpiration);
 	}
 
+	public String generateRefreshToken(com.bharath.incometer.models.user.UserPrincipal userPrincipal) {
+		Map<String, Object> extraClaims = new HashMap<>();
+		extraClaims.put("uuid", userPrincipal.getId().toString());
+		extraClaims.put("name", userPrincipal.getUserName());
+		return buildToken(extraClaims, userPrincipal, refreshExpiration);
+	}
 }

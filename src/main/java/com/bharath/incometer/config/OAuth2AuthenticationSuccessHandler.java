@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -28,6 +29,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
 	@Value("${app.oauth2.authorizedRedirectUris}")
 	private String redirectUri;
+
+	@Value("${app.cookie.secure:true}")
+	private boolean cookieSecure;
 
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -75,13 +79,28 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 		}
 
 		String token = jwtService.generateToken(userPrincipal);
+		String refreshToken = jwtService.generateRefreshToken(userPrincipal);
 
-		// Set token in httpOnly cookie
-		Cookie cookie = new Cookie("token", token);
-		cookie.setHttpOnly(true);
-		cookie.setSecure(false); // Assuming HTTPS in production
-		cookie.setPath("/");
-		response.addCookie(cookie);
+		// Create access token cookie with all security attributes
+		ResponseCookie accessCookie = ResponseCookie.from("accessToken", token)
+			.httpOnly(true)           // Cannot be accessed by JavaScript
+			.secure(cookieSecure)     // Only sent over HTTPS (configurable for dev/prod)
+			.path("/")                // Available for all paths
+			.maxAge(24 * 60 * 60)     // 24 hours
+			.sameSite("Lax")          // CSRF protection
+			.build();
+
+		// Create refresh token cookie
+		ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
+			.httpOnly(true)
+			.secure(cookieSecure)
+			.path("/")
+			.maxAge(7 * 24 * 60 * 60) // 7 days
+			.sameSite("Lax")
+			.build();
+
+		response.addHeader("Set-Cookie", accessCookie.toString());
+		response.addHeader("Set-Cookie", refreshCookie.toString());
 
 		return targetUrl;
 	}
