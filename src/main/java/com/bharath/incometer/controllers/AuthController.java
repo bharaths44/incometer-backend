@@ -23,23 +23,33 @@ public class AuthController {
 	@PostMapping("/register")
 	public ResponseEntity<String> register(
 		@RequestBody RegisterRequest request, HttpServletResponse response) {
-		return ResponseEntity.ok(service.register(request, response));
+		System.out.println(">>> POST /api/v1/auth/register - Email: " + request.getEmail());
+		String result = service.register(request, response);
+		System.out.println("<<< Register response: " + result);
+		return ResponseEntity.ok(result);
 	}
 
 	@PostMapping("/authenticate")
 	public ResponseEntity<String> authenticate(
 		@RequestBody LoginRequest request, HttpServletResponse response) {
-		return ResponseEntity.ok(service.authenticate(request, response));
+		System.out.println(">>> POST /api/v1/auth/authenticate - Email: " + request.getEmail());
+		String result = service.authenticate(request, response);
+		System.out.println("<<< Authenticate response: " + result);
+		return ResponseEntity.ok(result);
 	}
 
 	@PostMapping("/refresh")
 	public ResponseEntity<String> refresh(
 		@RequestBody RefreshRequest request, HttpServletResponse response) {
-		return ResponseEntity.ok(service.refresh(request, response));
+		System.out.println(">>> POST /api/v1/auth/refresh");
+		String result = service.refresh(request, response);
+		System.out.println("<<< Refresh response: " + result);
+		return ResponseEntity.ok(result);
 	}
 
 	@PostMapping("/logout")
 	public ResponseEntity<String> logout(HttpServletResponse response) {
+		System.out.println(">>> POST /api/v1/auth/logout");
 		// Clear access token cookie
 		ResponseCookie accessCookie = ResponseCookie.from("accessToken", "")
 			.httpOnly(true)
@@ -61,6 +71,8 @@ public class AuthController {
 		response.addHeader("Set-Cookie", accessCookie.toString());
 		response.addHeader("Set-Cookie", refreshCookie.toString());
 
+		System.out.println("✓ Cookies cleared");
+		System.out.println("<<< Logout response: Logged out successfully");
 		return ResponseEntity.ok("Logged out successfully");
 	}
 
