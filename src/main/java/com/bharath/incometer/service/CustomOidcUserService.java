@@ -2,7 +2,6 @@ package com.bharath.incometer.service;
 
 import com.bharath.incometer.entities.Users;
 import com.bharath.incometer.enums.AuthProvider;
-import com.bharath.incometer.enums.Role;
 import com.bharath.incometer.exceptions.OAuth2AuthenticationProcessingException;
 import com.bharath.incometer.models.user.OAuth2UserInfo;
 import com.bharath.incometer.models.user.OAuth2UserInfoFactory;
@@ -18,6 +17,8 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+
+import static com.bharath.incometer.service.CustomOAuth2UserService.saveUsers;
 
 @Service
 @RequiredArgsConstructor
@@ -70,12 +71,7 @@ public class CustomOidcUserService extends OidcUserService {
 	}
 
 	private Users registerNewUser(OidcUserRequest userRequest, OAuth2UserInfo oAuth2UserInfo) {
-		Users user = new Users();
-		user.setProvider(AuthProvider.valueOf(userRequest.getClientRegistration().getRegistrationId()));
-		user.setName(oAuth2UserInfo.getName());
-		user.setEmail(oAuth2UserInfo.getEmail());
-		user.setRole(Role.USER);
-		return userRepository.save(user);
+		return saveUsers(userRequest, oAuth2UserInfo, userRepository);
 	}
 
 	private Users updateExistingUser(Users existingUser, OAuth2UserInfo oAuth2UserInfo) {

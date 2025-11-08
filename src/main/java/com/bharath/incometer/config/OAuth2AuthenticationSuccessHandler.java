@@ -27,7 +27,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
 	private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
 
-	@Value("${app.oauth2.authorizedRedirectUris:http://localhost:3000/auth/callback}")
+	@Value("${app.oauth2.authorizedRedirectUris}")
 	private String redirectUri;
 
 	@Override

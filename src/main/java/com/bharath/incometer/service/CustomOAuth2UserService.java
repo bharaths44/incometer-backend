@@ -8,6 +8,7 @@ import com.bharath.incometer.models.user.OAuth2UserInfo;
 import com.bharath.incometer.models.user.OAuth2UserInfoFactory;
 import com.bharath.incometer.models.user.UserPrincipal;
 import com.bharath.incometer.repository.UsersRepository;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
@@ -70,6 +71,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 	}
 
 	private Users registerNewUser(OAuth2UserRequest oAuth2UserRequest, OAuth2UserInfo oAuth2UserInfo) {
+		return saveUsers(oAuth2UserRequest, oAuth2UserInfo, userRepository);
+	}
+
+	@NotNull
+	static Users saveUsers(OAuth2UserRequest oAuth2UserRequest, OAuth2UserInfo oAuth2UserInfo,
+	                       UsersRepository userRepository) {
 		Users user = new Users();
 
 		user.setProvider(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()));
