@@ -23,24 +23,25 @@ public class UserService {
 
 	private final UsersRepository usersRepository;
 	private final UserStatsRepository userStatsRepository;
-	private final AuthService authService;
 
-	public UserService(UsersRepository usersRepository, UserStatsRepository userStatsRepository,
-	                   AuthService authService) {
+	public UserService(UsersRepository usersRepository, UserStatsRepository userStatsRepository) {
 		this.usersRepository = usersRepository;
 		this.userStatsRepository = userStatsRepository;
-		this.authService = authService;
 	}
 
 	/**
 	 * Get the current authenticated user
 	 */
 	public Users getCurrentUser() {
-		Jwt jwt = SecurityUtils.getCurrentJwt();
-		if (jwt == null) {
+		// Try to get user email from either JWT or UserDetails
+		String userEmail = SecurityUtils.getCurrentUserEmail();
+		if (userEmail == null) {
 			throw new AccessDeniedException("User not authenticated");
 		}
-		return authService.getAuthenticatedUser(jwt);
+
+		// Find user by email
+		return usersRepository.findByEmail(userEmail)
+		                      .orElseThrow(() -> new AccessDeniedException("User not found: " + userEmail));
 	}
 
 	/**
@@ -103,7 +104,7 @@ public class UserService {
 		Users currentUser = getCurrentUser();
 
 		// Users can only view their own profile unless they have admin role
-		if (!currentUser.getUserId().equals(userId) && !hasAdminRole()) {
+		if (!currentUser.getUserId().equals(userId) && hasAdminRole()) {
 			throw new AccessDeniedException("Access denied: cannot view other user's profile");
 		}
 
@@ -126,7 +127,7 @@ public class UserService {
 		}
 
 		// Only admins can update other users
-		if (!hasAdminRole()) {
+		if (hasAdminRole()) {
 			throw new AccessDeniedException("Access denied: admin role required");
 		}
 
@@ -166,7 +167,7 @@ public class UserService {
 		}
 
 		// Only admins can delete users
-		if (!hasAdminRole()) {
+		if (hasAdminRole()) {
 			throw new AccessDeniedException("Access denied: admin role required");
 		}
 
@@ -182,7 +183,7 @@ public class UserService {
 	 */
 	public List<UserResponseDTO> getAllUsers() {
 		// Only admins can view all users
-		if (!hasAdminRole()) {
+		if (hasAdminRole()) {
 			throw new AccessDeniedException("Access denied: admin role required");
 		}
 
@@ -210,7 +211,7 @@ public class UserService {
 		Users currentUser = getCurrentUser();
 
 		// Users can only view their own stats unless they have admin role
-		if (!currentUser.getUserId().equals(userId) && !hasAdminRole()) {
+		if (!currentUser.getUserId().equals(userId) && hasAdminRole()) {
 			throw new AccessDeniedException("Access denied: cannot view other user's statistics");
 		}
 
@@ -224,7 +225,7 @@ public class UserService {
 	 */
 	public List<UserStatsResponseDTO> getAllUserStats() {
 		// Only admins can view all user stats
-		if (!hasAdminRole()) {
+		if (hasAdminRole()) {
 			throw new AccessDeniedException("Access denied: admin role required");
 		}
 
@@ -238,25 +239,35 @@ public class UserService {
 	 * Check if current user has admin role
 	 */
 	private boolean hasAdminRole() {
+		// First, check OAuth2 JWT claims
 		Jwt jwt = SecurityUtils.getCurrentJwt();
-		if (jwt == null) return false;
-
-		// Check realm_access.roles for admin role
-		Object realmAccess = jwt.getClaim("realm_access");
-		if (realmAccess instanceof java.util.Map) {
-			Object roles = ((java.util.Map<?, ?>) realmAccess).get("roles");
-			if (roles instanceof java.util.List) {
-				return ((java.util.List<?>) roles).contains("admin");
+		if (jwt != null) {
+			// Check realm_access.roles for admin role
+			Object realmAccess = jwt.getClaim("realm_access");
+			if (realmAccess instanceof java.util.Map) {
+				Object roles = ((java.util.Map<?, ?>) realmAccess).get("roles");
+				if (roles instanceof java.util.List) {
+					return !((List<?>) roles).contains("admin");
+				}
 			}
 		}
-		return false;
+
+		// Check authorities from Spring Security context (custom JWT)
+		org.springframework.security.core.Authentication authentication =
+			org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+		if (authentication != null && authentication.getAuthorities() != null) {
+			return authentication.getAuthorities().stream()
+			                     .noneMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
+		}
+
+		return true;
 	}
 
 	/**
 	 * Find user by email (admin only)
 	 */
 	public Optional<Users> findByEmail(String email) {
-		if (!hasAdminRole()) {
+		if (hasAdminRole()) {
 			throw new AccessDeniedException("Access denied: admin role required");
 		}
 		return usersRepository.findByEmail(email);
@@ -269,7 +280,7 @@ public class UserService {
 	@Transactional
 	public UserResponseDTO createUser(UserRequestDTO userRequestDTO) {
 		// Only admins can create users manually
-		if (!hasAdminRole()) {
+		if (hasAdminRole()) {
 			throw new AccessDeniedException("Access denied: admin role required");
 		}
 
