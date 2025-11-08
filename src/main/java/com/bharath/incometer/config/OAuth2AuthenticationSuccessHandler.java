@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.net.URI;
@@ -77,7 +76,14 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
 		String token = jwtService.generateToken(userPrincipal);
 
-		return UriComponentsBuilder.fromUriString(targetUrl).queryParam("token", token).build().toUriString();
+		// Set token in httpOnly cookie
+		Cookie cookie = new Cookie("token", token);
+		cookie.setHttpOnly(true);
+		cookie.setSecure(false); // Assuming HTTPS in production
+		cookie.setPath("/");
+		response.addCookie(cookie);
+
+		return targetUrl;
 	}
 
 	protected void clearAuthenticationAttributes(HttpServletRequest request, HttpServletResponse response) {

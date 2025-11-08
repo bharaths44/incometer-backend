@@ -1,6 +1,5 @@
 package com.bharath.incometer.controllers;
 
-import com.bharath.incometer.models.AuthenticationResponse;
 import com.bharath.incometer.models.LoginRequest;
 import com.bharath.incometer.models.RefreshRequest;
 import com.bharath.incometer.models.RegisterRequest;
@@ -21,21 +20,21 @@ public class AuthController {
 	private final AuthenticationService service;
 
 	@PostMapping("/register")
-	public ResponseEntity<AuthenticationResponse> register(
+	public ResponseEntity<String> register(
 		@RequestBody RegisterRequest request, HttpServletResponse response) {
 		return ResponseEntity.ok(service.register(request, response));
 	}
 
 	@PostMapping("/authenticate")
-	public ResponseEntity<AuthenticationResponse> authenticate(
+	public ResponseEntity<String> authenticate(
 		@RequestBody LoginRequest request, HttpServletResponse response) {
 		return ResponseEntity.ok(service.authenticate(request, response));
 	}
 
 	@PostMapping("/refresh")
-	public ResponseEntity<AuthenticationResponse> refresh(
-		@RequestBody RefreshRequest request) {
-		return ResponseEntity.ok(service.refresh(request));
+	public ResponseEntity<String> refresh(
+		@RequestBody RefreshRequest request, HttpServletResponse response) {
+		return ResponseEntity.ok(service.refresh(request, response));
 	}
 
 	// Note: Google OAuth2 is implemented via Spring Security's oauth2Login.
