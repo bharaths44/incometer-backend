@@ -33,6 +33,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 	@Value("${app.cookie.secure:true}")
 	private boolean cookieSecure;
 
+	@Value("${app.cookie.sameSite:Lax}")
+	private String cookieSameSite;
+
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 	                                    Authentication authentication) throws IOException {
@@ -92,26 +95,28 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 		System.out.println("Generating tokens for user: " + userPrincipal.getUsername());
 		String token = jwtService.generateToken(userPrincipal);
 		String refreshToken = jwtService.generateRefreshToken(userPrincipal);
-		System.out.println("✓ Tokens generated - Access: " + token.length() + " chars, Refresh: " + refreshToken.length() + " chars");
+		System.out.println(
+			"✓ Tokens generated - Access: " + token.length() + " chars, Refresh: " + refreshToken.length() + " chars");
 		System.out.println("Cookie secure setting: " + cookieSecure);
 
 		// Create access token cookie with all security attributes
 		ResponseCookie accessCookie = ResponseCookie.from("accessToken", token)
-			.httpOnly(true)           // Cannot be accessed by JavaScript
-			.secure(cookieSecure)     // Only sent over HTTPS (configurable for dev/prod)
-			.path("/")                // Available for all paths
-			.maxAge(24 * 60 * 60)     // 24 hours
-			.sameSite("Lax")          // CSRF protection
-			.build();
+		                                            .httpOnly(true)           // Cannot be accessed by JavaScript
+		                                            .secure(cookieSecure)     // Only sent over HTTPS (configurable
+		                                            // for dev/prod)
+		                                            .path("/")                // Available for all paths
+		                                            .maxAge(24 * 60 * 60)     // 24 hours
+		                                            .sameSite(cookieSameSite)          // CSRF protection
+		                                            .build();
 
 		// Create refresh token cookie
 		ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
-			.httpOnly(true)
-			.secure(cookieSecure)
-			.path("/")
-			.maxAge(7 * 24 * 60 * 60) // 7 days
-			.sameSite("Lax")
-			.build();
+		                                             .httpOnly(true)
+		                                             .secure(cookieSecure)
+		                                             .path("/")
+		                                             .maxAge(7 * 24 * 60 * 60) // 7 days
+		                                             .sameSite(cookieSameSite)
+		                                             .build();
 
 		System.out.println("Access cookie: " + accessCookie);
 		System.out.println("Refresh cookie: " + refreshCookie);

@@ -35,6 +35,8 @@ app:
     authorizedRedirectUris: http://localhost:3000/auth/callback
   cookie:
     secure: false  # For local development without HTTPS
+    sameSite: None
+
 
 server:
   port: 8080

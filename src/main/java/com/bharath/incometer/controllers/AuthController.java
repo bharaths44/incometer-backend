@@ -6,12 +6,13 @@ import com.bharath.incometer.models.RegisterRequest;
 import com.bharath.incometer.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.http.ResponseCookie;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -19,6 +20,12 @@ import org.springframework.http.ResponseCookie;
 public class AuthController {
 
 	private final AuthenticationService service;
+
+	@Value("${app.cookie.secure:true}")
+	private boolean cookieSecure;
+
+	@Value("${app.cookie.sameSite:Lax}")
+	private String cookieSameSite;
 
 	@PostMapping("/register")
 	public ResponseEntity<String> register(
@@ -52,21 +59,21 @@ public class AuthController {
 		System.out.println(">>> POST /api/v1/auth/logout");
 		// Clear access token cookie
 		ResponseCookie accessCookie = ResponseCookie.from("accessToken", "")
-			.httpOnly(true)
-			.secure(true) // Should match your cookie.secure setting
-			.path("/")
-			.maxAge(0) // Expire immediately
-			.sameSite("Lax")
-			.build();
+		                                            .httpOnly(true)
+		                                            .secure(cookieSecure) // Should match your cookie.secure setting
+		                                            .path("/")
+		                                            .maxAge(0) // Expire immediately
+		                                            .sameSite(cookieSameSite)
+		                                            .build();
 
 		// Clear refresh token cookie
 		ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", "")
-			.httpOnly(true)
-			.secure(true)
-			.path("/")
-			.maxAge(0)
-			.sameSite("Lax")
-			.build();
+		                                             .httpOnly(true)
+		                                             .secure(cookieSecure)
+		                                             .path("/")
+		                                             .maxAge(0)
+		                                             .sameSite(cookieSameSite)
+		                                             .build();
 
 		response.addHeader("Set-Cookie", accessCookie.toString());
 		response.addHeader("Set-Cookie", refreshCookie.toString());

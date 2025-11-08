@@ -26,6 +26,9 @@ public class AuthenticationService {
 	@Value("${app.cookie.secure:true}")
 	private boolean cookieSecure;
 
+	@Value("${app.cookie.sameSite:Lax}")
+	private String cookieSameSite;
+
 	public String register(RegisterRequest request, HttpServletResponse response) {
 		System.out.println("=== REGISTER START ===");
 		System.out.println("Registering user: " + request.getEmail());
@@ -44,8 +47,8 @@ public class AuthenticationService {
 	public String authenticate(LoginRequest request, HttpServletResponse response) {
 		System.out.println("=== AUTHENTICATE START ===");
 		System.out.println("Authenticating user: " + request.getEmail());
-		var user = repository.findByEmail(request.getEmail())
-		                     .orElseThrow(() -> new RuntimeException("User not found"));
+		var user = repository.findByEmail(request.getEmail()).orElseThrow(() -> new RuntimeException("User not " +
+		                                                                                             "found"));
 		System.out.println("User found in database: " + user.getUserId());
 		if (user.getPassword() == null || user.getPassword().isEmpty()) {
 			System.out.println("❌ User has no password (OAuth user)");
@@ -63,19 +66,18 @@ public class AuthenticationService {
 	public String refresh(RefreshRequest request, HttpServletResponse response) {
 		String refreshToken = request.getRefreshToken();
 		String username = jwtService.extractUsername(refreshToken);
-		var user = repository.findByEmail(username)
-		                     .orElseThrow(() -> new RuntimeException("User not found"));
+		var user = repository.findByEmail(username).orElseThrow(() -> new RuntimeException("User not found"));
 		if (jwtService.isTokenValid(refreshToken, user)) {
 			var newAccessToken = jwtService.generateToken(user);
 
 			// Set new access token cookie
 			ResponseCookie accessCookie = ResponseCookie.from("accessToken", newAccessToken)
-				.httpOnly(true)
-				.secure(cookieSecure)
-				.path("/")
-				.maxAge(24 * 60 * 60) // 24 hours
-				.sameSite("Lax")
-				.build();
+			                                            .httpOnly(true)
+			                                            .secure(cookieSecure)
+			                                            .path("/")
+			                                            .maxAge(24 * 60 * 60) // 24 hours
+			                                            .sameSite(cookieSameSite)
+			                                            .build();
 
 			response.addHeader("Set-Cookie", accessCookie.toString());
 			return "Token refreshed successfully";
@@ -97,21 +99,22 @@ public class AuthenticationService {
 
 		// Create access token cookie with all security attributes
 		ResponseCookie accessCookie = ResponseCookie.from("accessToken", jwtToken)
-			.httpOnly(true)           // Cannot be accessed by JavaScript
-			.secure(cookieSecure)     // Only sent over HTTPS (configurable for dev/prod)
-			.path("/")                // Available for all paths
-			.maxAge(24 * 60 * 60)     // 24 hours
-			.sameSite("Lax")          // CSRF protection
-			.build();
+		                                            .httpOnly(true)           // Cannot be accessed by JavaScript
+		                                            .secure(cookieSecure)     // Only sent over HTTPS (configurable
+		                                            // for dev/prod)
+		                                            .path("/")                // Available for all paths
+		                                            .maxAge(24 * 60 * 60)     // 24 hours
+		                                            .sameSite(cookieSameSite)          // CSRF protection
+		                                            .build();
 
 		// Create refresh token cookie
 		ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
-			.httpOnly(true)
-			.secure(cookieSecure)
-			.path("/")
-			.maxAge(7 * 24 * 60 * 60) // 7 days
-			.sameSite("Lax")
-			.build();
+		                                             .httpOnly(true)
+		                                             .secure(cookieSecure)
+		                                             .path("/")
+		                                             .maxAge(7 * 24 * 60 * 60) // 7 days
+		                                             .sameSite(cookieSameSite)
+		                                             .build();
 
 		System.out.println("Access cookie: " + accessCookie);
 		System.out.println("Refresh cookie: " + refreshCookie);
@@ -123,4 +126,3 @@ public class AuthenticationService {
 		System.out.println("--- End Setting Cookies ---");
 	}
 }
-
