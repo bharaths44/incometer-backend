@@ -52,7 +52,8 @@ public class SecurityConfig {
 		                                         .oidcUserService(customOidcUserService))
 		                                 .successHandler(oAuth2AuthenticationSuccessHandler)
 		                                 .failureHandler(oAuth2AuthenticationFailureHandler))
-		    .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+		    .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+		    .logout(logout -> logout.logoutUrl("/api/v1/auth/logout").logoutSuccessUrl("/").permitAll());
 
 		return http.build();
 	}
