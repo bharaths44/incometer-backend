@@ -1,7 +1,7 @@
 package com.bharath.incometer.config;
 
 import com.bharath.incometer.models.user.UserPrincipal;
-import com.bharath.incometer.service.JwtService;
+import com.bharath.incometer.service.auth.JwtService;
 import com.bharath.incometer.utils.CookieUtils;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;

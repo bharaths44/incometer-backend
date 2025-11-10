@@ -1,7 +1,8 @@
-package com.bharath.incometer.service;
+package com.bharath.incometer.service.auth;
 
 import com.bharath.incometer.entities.DTOs.UserRequestDTO;
 import com.bharath.incometer.repository.UsersRepository;
+import com.bharath.incometer.service.UserService;
 import org.springframework.stereotype.Service;
 
 @Service

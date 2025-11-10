@@ -2,6 +2,7 @@ package com.bharath.incometer.service;
 
 import com.bharath.incometer.entities.Users;
 import com.bharath.incometer.repository.UsersRepository;
+import com.bharath.incometer.service.auth.RegistrationService;
 import com.bharath.incometer.service.bot.TransactionMessageHandler;
 import com.bharath.incometer.service.bot.WhatsAppMessageProcessor;
 import org.junit.jupiter.api.BeforeEach;

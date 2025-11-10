@@ -1,6 +1,6 @@
 package com.bharath.incometer.config;
 
-import com.bharath.incometer.service.JwtService;
+import com.bharath.incometer.service.auth.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;

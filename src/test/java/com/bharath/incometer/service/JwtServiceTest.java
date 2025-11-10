@@ -2,6 +2,7 @@ package com.bharath.incometer.service;
 
 import com.bharath.incometer.entities.Users;
 import com.bharath.incometer.models.user.UserPrincipal;
+import com.bharath.incometer.service.auth.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

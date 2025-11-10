@@ -1,4 +1,4 @@
-package com.bharath.incometer.service;
+package com.bharath.incometer.service.auth;
 
 import com.bharath.incometer.entities.Users;
 import com.bharath.incometer.enums.Role;

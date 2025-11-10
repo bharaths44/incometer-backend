@@ -1,4 +1,4 @@
-package com.bharath.incometer.service;
+package com.bharath.incometer.service.auth;
 
 import com.bharath.incometer.entities.Users;
 import com.bharath.incometer.enums.AuthProvider;
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-import static com.bharath.incometer.service.CustomOAuth2UserService.saveUsers;
+import static com.bharath.incometer.service.auth.CustomOAuth2UserService.saveUsers;
 
 @Service
 @RequiredArgsConstructor

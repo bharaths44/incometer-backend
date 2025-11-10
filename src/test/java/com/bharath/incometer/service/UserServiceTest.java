@@ -6,6 +6,7 @@ import com.bharath.incometer.entities.Users;
 import com.bharath.incometer.enums.AuthProvider;
 import com.bharath.incometer.enums.Role;
 import com.bharath.incometer.repository.UsersRepository;
+import com.bharath.incometer.service.auth.AuthService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

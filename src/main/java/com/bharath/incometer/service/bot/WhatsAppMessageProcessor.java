@@ -2,7 +2,7 @@ package com.bharath.incometer.service.bot;
 
 import com.bharath.incometer.entities.Users;
 import com.bharath.incometer.repository.UsersRepository;
-import com.bharath.incometer.service.RegistrationService;
+import com.bharath.incometer.service.auth.RegistrationService;
 import org.springframework.stereotype.Service;
 
 @Service
