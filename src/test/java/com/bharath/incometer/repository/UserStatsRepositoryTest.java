@@ -71,8 +71,7 @@ class UserStatsRepositoryTest {
 			assertThat(stats.getTotalIncome()).isNotNull();
 			assertThat(stats.getTotalExpenseAmount()).isNotNull();
 			assertThat(stats.getTotalIncomeAmount()).isNotNull();
-			assertThat(stats.getNetBalance()).isNotNull();
-			assertThat(stats.getTotalDaysLogged()).isNotNull();
+
 
 		}
 	}
@@ -95,9 +94,7 @@ class UserStatsRepositoryTest {
 			assertThat(stats.getTotalTransactions()).isEqualTo(0L);
 			assertThat(stats.getTotalExpenses()).isEqualTo(0L);
 			assertThat(stats.getTotalIncome()).isEqualTo(0L);
-			assertThat(stats.getTotalDaysLogged()).isEqualTo(0L);
 			assertThat(stats.getFirstTransactionDate()).isNull();
-			assertThat(stats.getLastTransactionDate()).isNull();
 		}
 	}
 }

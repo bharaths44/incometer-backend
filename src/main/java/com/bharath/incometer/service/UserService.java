@@ -52,48 +52,6 @@ public class UserService {
 	}
 
 	/**
-	 * Update current authenticated user's profile
-	 */
-	@Transactional
-	public UserResponseDTO updateCurrentUser(UserRequestDTO userRequestDTO) {
-		if (userRequestDTO == null) {
-			throw new IllegalArgumentException("User data cannot be null");
-		}
-
-		Users currentUser = getCurrentUser();
-
-		// Update user properties if provided
-		if (userRequestDTO.name() != null && !userRequestDTO.name().trim().isEmpty()) {
-			currentUser.setName(userRequestDTO.name());
-		}
-
-		if (userRequestDTO.email() != null && !userRequestDTO.email().trim().isEmpty()) {
-			// Check if email is already taken by another user
-			Optional<Users> existingUser = usersRepository.findByEmail(userRequestDTO.email());
-			if (existingUser.isPresent() && !existingUser.get().getUserId().equals(currentUser.getUserId())) {
-				throw new IllegalArgumentException("Email already registered");
-			}
-			currentUser.setEmail(userRequestDTO.email());
-		}
-
-		if (userRequestDTO.phoneNumber() != null && !userRequestDTO.phoneNumber().trim().isEmpty()) {
-			currentUser.setPhoneNumber(userRequestDTO.phoneNumber());
-		}
-
-		Users updatedUser = usersRepository.save(currentUser);
-		return mapToResponseDTO(updatedUser);
-	}
-
-	/**
-	 * Delete current authenticated user account
-	 */
-	@Transactional
-	public void deleteCurrentUser() {
-		Users currentUser = getCurrentUser();
-		usersRepository.delete(currentUser);
-	}
-
-	/**
 	 * Get user by ID (admin only or own profile)
 	 */
 	public UserResponseDTO getUserById(UUID userId) {
@@ -187,17 +145,7 @@ public class UserService {
 			throw new AccessDeniedException("Access denied: admin role required");
 		}
 
-		return usersRepository.findAll().stream()
-		                      .map(this::mapToResponseDTO)
-		                      .collect(Collectors.toList());
-	}
-
-	/**
-	 * Get current user's statistics
-	 */
-	public UserStatsResponseDTO getCurrentUserStats() {
-		Users currentUser = getCurrentUser();
-		return getUserStats(currentUser.getUserId());
+		return usersRepository.findAll().stream().map(this::mapToResponseDTO).collect(Collectors.toList());
 	}
 
 	/**
@@ -220,20 +168,6 @@ public class UserService {
 		                          .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
 	}
 
-	/**
-	 * Get all user statistics (admin only)
-	 */
-	public List<UserStatsResponseDTO> getAllUserStats() {
-		// Only admins can view all user stats
-		if (hasAdminRole()) {
-			throw new AccessDeniedException("Access denied: admin role required");
-		}
-
-		return userStatsRepository.findAll()
-		                          .stream()
-		                          .map(this::mapToStatsResponseDTO)
-		                          .collect(Collectors.toList());
-	}
 
 	/**
 	 * Check if current user has admin role
@@ -254,23 +188,15 @@ public class UserService {
 
 		// Check authorities from Spring Security context (custom JWT)
 		org.springframework.security.core.Authentication authentication =
-			org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+			org.springframework.security.core.context.SecurityContextHolder.getContext()
+		                                                                                                                                 .getAuthentication();
 		if (authentication != null && authentication.getAuthorities() != null) {
-			return authentication.getAuthorities().stream()
+			return authentication.getAuthorities()
+			                     .stream()
 			                     .noneMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
 		}
 
 		return true;
-	}
-
-	/**
-	 * Find user by email (admin only)
-	 */
-	public Optional<Users> findByEmail(String email) {
-		if (hasAdminRole()) {
-			throw new AccessDeniedException("Access denied: admin role required");
-		}
-		return usersRepository.findByEmail(email);
 	}
 
 	/**
@@ -324,20 +250,15 @@ public class UserService {
 	}
 
 	private UserStatsResponseDTO mapToStatsResponseDTO(UserStats stats) {
-		return new UserStatsResponseDTO(
-			stats.getUserId(),
-			stats.getUserName(),
-			stats.getUserEmail(),
-			stats.getAccountCreatedAt(),
-			stats.getTotalTransactions(),
-			stats.getTotalExpenses(),
-			stats.getTotalIncome(),
-			stats.getTotalExpenseAmount(),
-			stats.getTotalIncomeAmount(),
-			stats.getNetBalance(),
-			stats.getTotalDaysLogged(),
-			stats.getFirstTransactionDate(),
-			stats.getLastTransactionDate()
-		);
+		return new UserStatsResponseDTO(stats.getUserId(),
+		                                stats.getUserName(),
+		                                stats.getUserEmail(),
+		                                stats.getAccountCreatedAt(),
+		                                stats.getTotalTransactions(),
+		                                stats.getTotalExpenses(),
+		                                stats.getTotalIncome(),
+		                                stats.getTotalExpenseAmount(),
+		                                stats.getTotalIncomeAmount(),
+		                                stats.getFirstTransactionDate());
 	}
 }
