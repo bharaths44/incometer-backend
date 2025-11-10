@@ -12,13 +12,16 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: none
     show-sql: true
     properties:
       hibernate:
         format_sql: true
     database: h2
     database-platform: org.hibernate.dialect.H2Dialect
+
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
 
   security:
     oauth2:
@@ -51,4 +54,3 @@ jwt:
   expiration: 86400000  # 24 hours in milliseconds
   refresh-token:
     expiration: 604800000 # 7 days
-

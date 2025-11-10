@@ -2,6 +2,8 @@ package com.bharath.incometer.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Immutable;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -9,10 +11,10 @@ import java.util.UUID;
 
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "user_stats")
+@Table(name = "user_stats_view")
+@Immutable
 public class UserStats {
 
     @Id

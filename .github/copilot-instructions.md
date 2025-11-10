@@ -129,7 +129,7 @@ docker run --network=host --env-file .env incometer-app
 2. **PostgreSQL/Supabase**: Primary database
 
     - JPA `ddl-auto: create-drop` (development only!)
-    - Schema managed by Hibernate, see `schema.sql`/`data.sql` for reference
+    - Schema managed by Hibernate, see `view_schema.sql`/`insert_data.sql` for reference
 
 3. **OAuth2 Provider**: Google login
     - Redirect URI: `http://localhost:8080/oauth2/callback/google`
@@ -150,6 +150,69 @@ docker run --network=host --env-file .env incometer-app
 4. **Phone number normalization**: Strip "whatsapp:" prefix in `WhatsAppController`
 5. **Gemini API key**: Must be set before Spring context loads (in main method)
 6. **CORS**: Configured in `CorsConfig` for frontend integration (likely React at localhost:3000)
+7. **Liquibase Baseline**: Current setup uses `generated-initial.yaml` to mark existing schema as applied. Do NOT recreate tables; use migrations for changes only.
+
+## Database Migrations (Liquibase)
+
+### Architecture
+
+- **Baseline**: `src/main/resources/db/changelog/generated-initial.yaml` marks existing schema
+- **Master**: `src/main/resources/db/changelog/db.changelog-master.xml` includes all changesets
+- **Migrations**: Future changes go in new YAML files in `db/changelog/`
+- **Production**: Liquibase handles all migrations (not Hibernate `ddl-auto`)
+- **Tests**: H2 in-memory uses Hibernate (`ddl-auto: update`)
+
+### Adding New Migrations
+
+When making schema changes:
+
+1. Create new file: `src/main/resources/db/changelog/vX-description.yaml`
+2. Define changeset with unique ID and author
+3. Include in `db.changelog-master.xml`:
+   ```xml
+   <include file="classpath:db/changelog/vX-description.yaml"/>
+   ```
+
+### Example Migration
+
+```yaml
+databaseChangeLog:
+  - changeSet:
+      id: v2-001-add-notes-to-transactions
+      author: bharaths
+      changes:
+        - addColumn:
+            tableName: transactions
+            columns:
+              - column:
+                  name: notes
+                  type: VARCHAR(500)
+        - addColumn:
+            tableName: transactions
+            columns:
+              - column:
+                  name: receipt_url
+                  type: VARCHAR(500)
+```
+
+### Important Notes
+
+- **Never modify existing changesets** - Liquibase has already executed them
+- **Always add new changesets** for schema changes
+- **Use meaningful IDs** (e.g., v2-001, v2-002, not timestamps)
+- **Include comments** explaining the purpose of changes
+- **Test migrations** on local database before deploying
+- **Rollback**: Add a `<rollback>` block for reversible changes
+
+### Database Reset (Development Only)
+
+If you need to reset the database:
+
+```sql
+DROP TABLE IF EXISTS databasechangeloglock;
+DROP TABLE IF EXISTS databasechangelog;
+-- Then drop all app tables and restart the application
+```
 
 ## When Adding Features
 
@@ -157,4 +220,4 @@ docker run --network=host --env-file .env incometer-app
 - **New endpoints**: Add controller, ensure security rules in `SecurityConfig`
 - **WhatsApp commands**: Extend `TransactionMessageHandler` or `NLPService`
 - **Auth changes**: Review both JWT and OAuth2 flows (dual system)
-- **Database changes**: Consider migration strategy (currently using create-drop!)
+- **Database changes**: Create new Liquibase migration in `db/changelog/`, DO NOT use `ddl-auto`

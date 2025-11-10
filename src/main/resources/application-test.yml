@@ -13,7 +13,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
 
-  # Disable schema.sql for @DataJpaTest since Hibernate creates tables automatically
+  # Disable view_schema.sql for @DataJpaTest since Hibernate creates tables automatically
   sql:
     init:
       mode: never

@@ -7,7 +7,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: false
     properties:
       hibernate:
@@ -24,6 +24,9 @@ spring:
             client-secret: ${GOOGLE_CLIENT_SECRET}
             redirect-uri: ${GOOGLE_REDIRECT_URI}
             scope: openid,email,profile
+
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
 
 app:
   cors:

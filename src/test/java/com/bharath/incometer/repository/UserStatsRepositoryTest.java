@@ -21,7 +21,7 @@ class UserStatsRepositoryTest {
 
 	@Test
 	void testFindAllUserStats() {
-		// Given: Database has users (from data.sql)
+		// Given: Database has users (from insert_data.sql)
 
 		// When: Fetch all user stats
 		List<UserStats> allStats = userStatsRepository.findAll();
