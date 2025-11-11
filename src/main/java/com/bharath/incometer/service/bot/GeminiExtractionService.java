@@ -9,7 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.io.InputStream;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Map;
 
@@ -19,6 +21,7 @@ public class GeminiExtractionService {
 	private static final Logger logger = LoggerFactory.getLogger(GeminiExtractionService.class);
 	private final Client geminiClient;
 	private final ObjectMapper objectMapper;
+	private final String schemaJson;
 
 	public GeminiExtractionService() {
 		String apiKey = System.getenv("GEMINI_API_KEY");
@@ -28,6 +31,14 @@ public class GeminiExtractionService {
 		}
 		this.geminiClient = Client.builder().apiKey(apiKey).build();
 		this.objectMapper = new ObjectMapper();
+		try (InputStream is = getClass().getResourceAsStream("/schemas/transaction-extraction-schema.json")) {
+			if (is == null) {
+				throw new RuntimeException("Schema file not found");
+			}
+			this.schemaJson = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to load schema", e);
+		}
 	}
 
 	/**
@@ -38,8 +49,7 @@ public class GeminiExtractionService {
 			String prompt =
 				"Extract structured expense/income information from the following text:\n" + "Text: \"" + body +
 				"\"\n" +
-				"Return JSON with fields: amount (number), category (string), payment_method (string), date " +
-				"(YYYY-MM-DD). " +
+				"Return JSON that conforms to this schema:\n" + schemaJson + "\n" +
 				"For the date field, ALWAYS return in YYYY-MM-DD format. Convert relative dates like 'today', " +
 				"'yesterday', 'tomorrow' to actual dates. " +
 				"Today's date is " + LocalDate.now() + ". " + "If a field cannot be determined, leave it null. " +
@@ -114,4 +124,3 @@ public class GeminiExtractionService {
 		}
 	}
 }
-

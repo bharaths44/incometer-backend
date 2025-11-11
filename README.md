@@ -21,6 +21,7 @@
   <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL">
   <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase">
   <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
+  <img src="https://img.shields.io/badge/Liquibase-2962FF?style=for-the-badge&logo=liquibase&logoColor=white" alt="Liquibase">
   <img src="https://img.shields.io/badge/Deployed%20on-Koyeb-000000?style=for-the-badge&logo=koyeb" alt="Koyeb">
 </p>
 
@@ -104,7 +105,7 @@ docker build -t incometer-app .
 docker run --network=host --env-file .env incometer-app
 ```
 
-## 📖 API Documentation
+## API Documentation
 
 Once the application is running, access the Swagger UI at:
 `http://localhost:8080/swagger-ui/index.html`
@@ -184,6 +185,6 @@ Schema changes are managed through Liquibase:
 - Ensure all endpoints are secured appropriately
 
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
