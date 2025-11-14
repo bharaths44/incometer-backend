@@ -7,6 +7,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseCookie;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,6 +17,9 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.bharath.incometer.repository.UsersRepository;
+import com.bharath.incometer.entities.Users;
+
 import java.io.IOException;
 
 @Component
@@ -24,6 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private final JwtService jwtService;
 	private final UserDetailsService userDetailsService;
+	private final UsersRepository usersRepository;
 
 	@Override
 	protected void doFilterInternal(
@@ -66,6 +71,52 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		}
 
 		if (token == null) {
+			// Try to refresh using refreshToken
+			String refreshToken = null;
+			if (cookies != null) {
+				for (Cookie cookie : cookies) {
+					if ("refreshToken".equals(cookie.getName())) {
+						refreshToken = cookie.getValue();
+						System.out.println("✓ RefreshToken found in cookies");
+						break;
+					}
+				}
+			}
+			if (refreshToken != null) {
+				try {
+					String username = jwtService.extractUsername(refreshToken);
+					var userDetails = userDetailsService.loadUserByUsername(username);
+					if (jwtService.isTokenValid(refreshToken, userDetails)) {
+						System.out.println("✓ RefreshToken is valid, generating new access token");
+						Users userEntity = usersRepository.findByEmail(username).orElseThrow(() -> new RuntimeException("User not found"));
+						String newAccessToken = jwtService.generateToken(userEntity);
+
+						// Set new access token cookie
+						ResponseCookie accessCookie = ResponseCookie.from("accessToken", newAccessToken)
+						                                            .httpOnly(true)
+						                                            .secure(false) // Set to true in production
+						                                            .path("/")
+						                                            .maxAge(24 * 60 * 60) // 24 hours
+						                                            .sameSite("Lax")
+						                                            .build();
+						response.addHeader("Set-Cookie", accessCookie.toString());
+
+						// Set authentication for this request
+						UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
+						                                                                                        null,
+						                                                                                        userDetails.getAuthorities());
+						authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+						SecurityContextHolder.getContext().setAuthentication(authToken);
+						System.out.println("✓ New access token generated and authentication set for user: " + username);
+						filterChain.doFilter(request, response);
+						return;
+					} else {
+						System.out.println("❌ RefreshToken validation failed");
+					}
+				} catch (Exception e) {
+					System.out.println("❌ Error during token refresh: " + e.getMessage());
+				}
+			}
 			System.out.println("❌ No token found - proceeding without authentication");
 			filterChain.doFilter(request, response);
 			return;
