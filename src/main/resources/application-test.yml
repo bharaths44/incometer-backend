@@ -18,6 +18,41 @@ spring:
     init:
       mode: never
 
-  test:
-    database:
-      replace: none
+  # Disable Liquibase for tests - use Hibernate ddl-auto instead
+  liquibase:
+    enabled: false
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: dummy-client-id
+            client-secret: dummy-client-secret
+            redirect-uri: http://localhost:8080/oauth2/callback/google
+            scope: openid,email,profile
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            user-name-attribute: sub
+
+app:
+  cors:
+    allowed-origins: http://localhost:3000
+  oauth2:
+    authorizedRedirectUris: https://incometer-f451c.web.app
+  registration-url: https://incometer-frontend.vercel.app/sign-in
+  cookie:
+    secure: false
+    sameSite: Lax
+  twilio:
+    whatsapp:
+      number: +1234567890
+
+jwt:
+  secret: 9d6c4e2a9f7b1c0d5e8f3a7b6c1d2e4f9a6b3c8d7e5f1a2b3c4d5e6f7a8b9c0
+  expiration: 86400000
+  refresh-token:
+    expiration: 604800000

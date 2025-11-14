@@ -1,0 +1,17 @@
+# Ignore everything by default
+*
+
+# Include essential files for build
+!pom.xml
+!mvnw
+!mvnw.cmd
+!.mvn/
+
+# Include source files
+!src/
+!src/main/
+!src/main/**
+
+# Exclude test files
+src/test/
+

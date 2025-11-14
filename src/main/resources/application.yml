@@ -49,8 +49,7 @@ logging:
     org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer: ERROR
 
 jwt:
-  secret: mySecretKeyForJWTWhichShouldBeLongEnoughToBeSecure
+  secret: ${JWT_SECRET}
   expiration: 86400000  # 24 hours in milliseconds
   refresh-token:
     expiration: 604800000 # 7 days
-

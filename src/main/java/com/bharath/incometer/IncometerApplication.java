@@ -24,6 +24,7 @@ public class IncometerApplication {
 		                   Objects.requireNonNull(dotenv.get("APP_AUTHORIZED_REDIRECT_URIS")));
 		System.setProperty("CORS_ALLOWED_ORIGINS", Objects.requireNonNull(dotenv.get("CORS_ALLOWED_ORIGINS")));
 		System.setProperty("TWILIO_WHATSAPP_NUMBER", Objects.requireNonNull(dotenv.get("TWILIO_WHATSAPP_NUMBER")));
+		System.setProperty("JWT_SECRET", Objects.requireNonNull(dotenv.get("JWT_SECRET")));
 		Twilio.init(Objects.requireNonNull(dotenv.get("TWILIO_ACCOUNT_SID")),
 		            Objects.requireNonNull(dotenv.get("TWILIO_AUTH_TOKEN")));
 		SpringApplication.run(IncometerApplication.class, args);

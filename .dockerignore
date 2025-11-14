@@ -5,8 +5,7 @@ README.md
 HELP.md
 mvnw
 mvnw.cmd
-qodana.yaml
 *.log
 .DS_Store
 .env
-
+.koyebignore

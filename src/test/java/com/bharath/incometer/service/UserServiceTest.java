@@ -61,7 +61,7 @@ public class UserServiceTest {
 		// Create mock JWT
 		mockJwt = Jwt.withTokenValue("mock-token")
 		             .header("alg", "RS256")
-		             .claim("sub", user.getUserId().toString())
+		             .claim("sub", user.getEmail())
 		             .build();
 
 		// Set up security context with JWT
@@ -106,6 +106,9 @@ public class UserServiceTest {
 
 		// Mock auth service - only needed for tests that call getCurrentUser
 		lenient().when(authService.getAuthenticatedUser(mockJwt)).thenReturn(user);
+
+		// Mock repository for getCurrentUser
+		lenient().when(usersRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
 	}
 
 	@Test

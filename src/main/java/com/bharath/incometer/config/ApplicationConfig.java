@@ -1,8 +1,11 @@
 package com.bharath.incometer.config;
 
 import com.bharath.incometer.repository.UsersRepository;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,10 +20,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+
 @Configuration
 @RequiredArgsConstructor
 public class ApplicationConfig {
 
+	private static final Logger log = LoggerFactory.getLogger(ApplicationConfig.class);
 	private final UsersRepository repository;
 
 	@Value("${jwt.secret}")
@@ -51,6 +58,17 @@ public class ApplicationConfig {
 
 	@Bean
 	public JwtDecoder jwtDecoder() {
-		return NimbusJwtDecoder.withSecretKey(Keys.hmacShaKeyFor(secretKey.getBytes())).build();
+		byte[] keyBytes = secretKey == null ? new byte[0] : secretKey.trim().getBytes(StandardCharsets.UTF_8);
+		SecretKey keyToUse;
+		if (keyBytes.length < 32) { // HS256 requires >= 32 bytes (256 bits)
+			log.warn(
+				"Configured jwt.secret is too short ({} bytes). Generating ephemeral HS256 key for runtime. PLEASE " +
+				"set" + " a secure >=32 byte secret in the environment/property for non-test profiles.",
+				keyBytes.length);
+			keyToUse = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+		} else {
+			keyToUse = Keys.hmacShaKeyFor(keyBytes);
+		}
+		return NimbusJwtDecoder.withSecretKey(keyToUse).build();
 	}
 }
