@@ -4,7 +4,6 @@ import com.bharath.incometer.entities.DTOs.UserRequestDTO;
 import com.bharath.incometer.entities.DTOs.UserResponseDTO;
 import com.bharath.incometer.entities.DTOs.UserStatsResponseDTO;
 import com.bharath.incometer.service.UserService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,22 +19,6 @@ public class UserController {
 	public UserController(UserService userService) {
 		this.userService = userService;
 	}
-
-	@PostMapping
-	public ResponseEntity<UserResponseDTO> createUser(
-		@RequestBody UserRequestDTO userRequestDTO) {
-		try {
-			UserResponseDTO createdUser = userService.createUser(userRequestDTO);
-			return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
-		} catch (IllegalArgumentException e) {
-			// Return 400 Bad Request for validation errors
-			throw e;
-		} catch (Exception e) {
-			// Return 500 for unexpected errors
-			throw new RuntimeException("Error creating user: " + e.getMessage());
-		}
-	}
-
 
 	@GetMapping("/{userId}")
 	public ResponseEntity<UserResponseDTO> getUserById(
@@ -105,6 +88,17 @@ public class UserController {
 	}
 
 
+	@GetMapping("/me")
+	public ResponseEntity<UserResponseDTO> getCurrentUser() {
+		try {
+			UserResponseDTO user = userService.getCurrentUserDTO();
+			return ResponseEntity.ok(user);
+		} catch (Exception e) {
+			// Return 500 for unexpected errors
+			throw new RuntimeException("Error retrieving current user: " + e.getMessage());
+		}
+	}
+
 	@GetMapping("/{userId}/stats")
 	public ResponseEntity<UserStatsResponseDTO> getUserStats(
 		@PathVariable UUID userId) {
@@ -119,30 +113,7 @@ public class UserController {
 			throw e;
 		} catch (Exception e) {
 			// Return 500 for unexpected errors
-			throw new RuntimeException("Error retrieving user stats: " + e.getMessage());
-		}
-	}
-
-
-	@GetMapping("/stats")
-	public ResponseEntity<List<UserStatsResponseDTO>> getAllUserStats() {
-		try {
-			List<UserStatsResponseDTO> stats = userService.getAllUserStats();
-			return ResponseEntity.ok(stats);
-		} catch (Exception e) {
-			// Return 500 for unexpected errors
-			throw new RuntimeException("Error retrieving all user stats: " + e.getMessage());
-		}
-	}
-
-	@GetMapping("/me")
-	public ResponseEntity<UserResponseDTO> getCurrentUser() {
-		try {
-			UserResponseDTO user = userService.getCurrentUserDTO();
-			return ResponseEntity.ok(user);
-		} catch (Exception e) {
-			// Return 500 for unexpected errors
-			throw new RuntimeException("Error retrieving current user: " + e.getMessage());
+			throw new RuntimeException("Error retrieving user statistics: " + e.getMessage());
 		}
 	}
 }

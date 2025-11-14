@@ -2,36 +2,45 @@ package com.bharath.incometer.service.bot;
 
 import com.bharath.incometer.entities.Users;
 import com.bharath.incometer.repository.UsersRepository;
-import com.bharath.incometer.service.RegistrationService;
 import org.springframework.stereotype.Service;
 
 @Service
 public class WhatsAppMessageProcessor {
 
 	private final UsersRepository usersRepository;
-	private final RegistrationService registrationService;
-	private final TransactionMessageHandler transactionHandler;
+	private final WhatsAppCommandHandler commandHandler;
 
-	public WhatsAppMessageProcessor(UsersRepository usersRepository,
-	                                RegistrationService registrationService,
-	                                TransactionMessageHandler transactionHandler) {
+
+	public WhatsAppMessageProcessor(UsersRepository usersRepository, WhatsAppCommandHandler commandHandler) {
 		this.usersRepository = usersRepository;
-		this.registrationService = registrationService;
-		this.transactionHandler = transactionHandler;
+		this.commandHandler = commandHandler;
 	}
 
-	public String processMessage(String from, String body) {
-		body = body.trim();
-
-		if (body.toLowerCase().startsWith("register ")) {
-			return registrationService.registerUser(from, body.substring(9).trim());
-		}
+	public void processMessage(String from, String body) {
+		String normalizedBody = (body == null ? "" : body.trim());
+		String lowerBody = normalizedBody.toLowerCase();
 
 		Users user = usersRepository.findByPhoneNumber(from);
 		if (user == null) {
-			return "❌ You are not registered. Send 'Register <Your Name>' to register.";
+			commandHandler.handleUnregisteredUser(from);
+			return;
 		}
 
-		return transactionHandler.handleTransactionMessage(user, body);
+		// Handle commands
+		switch (lowerBody) {
+			case "hello", "hi" -> commandHandler.handleGreetings(from);
+			case "help" -> commandHandler.handleHelp(from);
+			case "balance" -> commandHandler.handleBalance(from, user);
+			case "list transactions" -> commandHandler.handleListTransactions(from, user);
+			default -> {
+				if (lowerBody.startsWith("summary")) {
+					commandHandler.handleSummary(from, normalizedBody, user);
+				} else if (lowerBody.startsWith("category summary")) {
+					commandHandler.handleCategorySummary(from, normalizedBody, user);
+				} else {
+					commandHandler.handleDefaultTransaction(from, user, normalizedBody);
+				}
+			}
+		}
 	}
 }

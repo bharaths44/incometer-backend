@@ -1,6 +1,5 @@
 package com.bharath.incometer.controllers;
 
-import com.bharath.incometer.models.BudgetAnalytics;
 import com.bharath.incometer.models.CategoryAnalytics;
 import com.bharath.incometer.models.ExpenseSummary;
 import com.bharath.incometer.service.AnalyticsService;
@@ -35,12 +34,5 @@ public class AnalyticsController {
 		@PathVariable UUID userId) {
 		List<CategoryAnalytics> categories = analyticsService.getCategoryAnalytics(userId);
 		return ResponseEntity.ok(categories);
-	}
-
-	@GetMapping("/user/{userId}/budgets")
-	public ResponseEntity<List<BudgetAnalytics>> getBudgetAnalytics(
-		@PathVariable UUID userId) {
-		List<BudgetAnalytics> budgets = analyticsService.getBudgetAnalytics(userId);
-		return ResponseEntity.ok(budgets);
 	}
 }

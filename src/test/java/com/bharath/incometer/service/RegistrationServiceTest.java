@@ -4,6 +4,7 @@ import com.bharath.incometer.entities.DTOs.UserRequestDTO;
 import com.bharath.incometer.entities.DTOs.UserResponseDTO;
 import com.bharath.incometer.entities.Users;
 import com.bharath.incometer.repository.UsersRepository;
+import com.bharath.incometer.service.auth.RegistrationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

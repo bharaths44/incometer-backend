@@ -14,9 +14,6 @@ public record UserStatsResponseDTO(
         Long totalIncome,
         BigDecimal totalExpenseAmount,
         BigDecimal totalIncomeAmount,
-        BigDecimal netBalance,
-        Long totalDaysLogged,
-        LocalDateTime firstTransactionDate,
-        LocalDateTime lastTransactionDate
+        LocalDateTime firstTransactionDate
 ) {
 }

@@ -1,0 +1,33 @@
+databaseChangeLog:
+  - changeSet:
+      id: v2-001-create-user-stats-view
+      author: bharaths
+      comment: "Create user_stats_view for automatic user analytics calculation"
+      changes:
+        - sql:
+            sql: DROP TABLE IF EXISTS user_stats_view;
+        - createView:
+            viewName: user_stats_view
+            selectQuery: |
+              SELECT
+                u.user_id,
+                u.name as user_name,
+                u.email as user_email,
+                u.created_at as account_created_at,
+
+                -- Transaction counts
+                COALESCE(COUNT(t.transaction_id), 0) as total_transactions,
+                COALESCE(COUNT(CASE WHEN t.transaction_type = 'EXPENSE' THEN 1 END), 0) as total_expenses,
+                COALESCE(COUNT(CASE WHEN t.transaction_type = 'INCOME' THEN 1 END), 0) as total_income,
+
+                -- Amount totals
+                COALESCE(SUM(CASE WHEN t.transaction_type = 'EXPENSE' THEN t.amount ELSE 0 END), 0) as total_expense_amount,
+                COALESCE(SUM(CASE WHEN t.transaction_type = 'INCOME' THEN t.amount ELSE 0 END), 0) as total_income_amount,
+
+                -- Transaction date ranges
+                MIN(t.transaction_date) as first_transaction_date
+
+              FROM users u
+              LEFT JOIN transactions t ON u.user_id = t.user_id
+              GROUP BY u.user_id, u.name, u.email, u.created_at
+            replaceIfExists: true

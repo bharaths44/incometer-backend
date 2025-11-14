@@ -3,7 +3,7 @@ package com.bharath.incometer.controllers;
 import com.bharath.incometer.models.LoginRequest;
 import com.bharath.incometer.models.RefreshRequest;
 import com.bharath.incometer.models.RegisterRequest;
-import com.bharath.incometer.service.AuthenticationService;
+import com.bharath.incometer.service.auth.AuthenticationService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

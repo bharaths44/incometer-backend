@@ -1,0 +1,8 @@
+databaseChangeLog:
+  - changeSet:
+      id: baseline-001-mark-existing-schema
+      author: bharaths
+      comment: "Mark existing database schema as applied"
+      changes:
+        - tagDatabase:
+            tag: baseline
