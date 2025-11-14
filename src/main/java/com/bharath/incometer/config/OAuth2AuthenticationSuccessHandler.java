@@ -105,7 +105,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 		                                            .secure(cookieSecure)     // Only sent over HTTPS (configurable
 		                                            // for dev/prod)
 		                                            .path("/")                // Available for all paths
-		                                            .maxAge(24 * 60 * 60)     // 24 hours
+		                                            .maxAge(15 * 60)          // 15 minutes
 		                                            .sameSite(cookieSameSite)          // CSRF protection
 		                                            .build();
 

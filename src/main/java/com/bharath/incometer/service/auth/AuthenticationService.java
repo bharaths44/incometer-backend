@@ -1,12 +1,13 @@
 package com.bharath.incometer.service.auth;
 
+import com.bharath.incometer.entities.DTOs.UserResponseDTO;
 import com.bharath.incometer.entities.Users;
 import com.bharath.incometer.enums.Role;
-import com.bharath.incometer.models.AuthenticationResponse;
 import com.bharath.incometer.models.LoginRequest;
-import com.bharath.incometer.models.RefreshRequest;
 import com.bharath.incometer.models.RegisterRequest;
 import com.bharath.incometer.repository.UsersRepository;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,7 +31,7 @@ public class AuthenticationService {
 	@Value("${app.cookie.sameSite:Lax}")
 	private String cookieSameSite;
 
-	public AuthenticationResponse register(RegisterRequest request, HttpServletResponse response) {
+	public UserResponseDTO register(RegisterRequest request, HttpServletResponse response) {
 		System.out.println("=== REGISTER START ===");
 		System.out.println("Registering user: " + request.getEmail());
 		var user = new Users();
@@ -40,12 +41,12 @@ public class AuthenticationService {
 		user.setRole(Role.USER);
 		repository.save(user);
 		System.out.println("User saved to database with ID: " + user.getUserId());
-		AuthenticationResponse authResponse = setAuthenticationCookies(response, user);
+		setAuthenticationCookies(response, user);
 		System.out.println("=== REGISTER END ===\n");
-		return authResponse;
+		return mapToResponseDTO(user);
 	}
 
-	public AuthenticationResponse authenticate(LoginRequest request, HttpServletResponse response) {
+	public UserResponseDTO authenticate(LoginRequest request, HttpServletResponse response) {
 		System.out.println("=== AUTHENTICATE START ===");
 		System.out.println("Authenticating user: " + request.getEmail());
 		var user = repository.findByEmail(request.getEmail()).orElseThrow(() -> new RuntimeException("User not " +
@@ -59,39 +60,49 @@ public class AuthenticationService {
 		authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(),
 		                                                                           request.getPassword()));
 		System.out.println("✓ Password validated successfully for: " + request.getEmail());
-		AuthenticationResponse authResponse = setAuthenticationCookies(response, user);
+		setAuthenticationCookies(response, user);
 		System.out.println("=== AUTHENTICATE END ===\n");
-		return authResponse;
+		return mapToResponseDTO(user);
 	}
 
-	public AuthenticationResponse refresh(RefreshRequest request, HttpServletResponse response) {
-		String refreshToken = request.getRefreshToken();
+	public String refresh(HttpServletRequest request, HttpServletResponse response) {
+		// Extract refresh token from cookie
+		String refreshToken = null;
+		if (request.getCookies() != null) {
+			for (Cookie cookie : request.getCookies()) {
+				if ("refreshToken".equals(cookie.getName())) {
+					refreshToken = cookie.getValue();
+					break;
+				}
+			}
+		}
+
+		if (refreshToken == null) {
+			throw new RuntimeException("Refresh token not found in cookies");
+		}
+
 		String username = jwtService.extractUsername(refreshToken);
 		var user = repository.findByEmail(username).orElseThrow(() -> new RuntimeException("User not found"));
 		if (jwtService.isTokenValid(refreshToken, user)) {
 			var newAccessToken = jwtService.generateToken(user);
 
-			// Set new access token cookie
+			// Set new access token cookie with 15 minutes expiration
 			ResponseCookie accessCookie = ResponseCookie.from("accessToken", newAccessToken)
 			                                            .httpOnly(true)
 			                                            .secure(cookieSecure)
 			                                            .path("/")
-			                                            .maxAge(24 * 60 * 60) // 24 hours
+			                                            .maxAge(15 * 60) // 15 minutes
 			                                            .sameSite(cookieSameSite)
 			                                            .build();
 
 			response.addHeader("Set-Cookie", accessCookie.toString());
-
-			return AuthenticationResponse.builder()
-			                             .accessToken(newAccessToken)
-			                             .refreshToken(refreshToken)
-			                             .build();
+			return "Token refreshed successfully";
 		} else {
 			throw new RuntimeException("Invalid refresh token");
 		}
 	}
 
-	private AuthenticationResponse setAuthenticationCookies(HttpServletResponse response, Users user) {
+	private void setAuthenticationCookies(HttpServletResponse response, Users user) {
 		System.out.println("--- Setting Authentication Cookies ---");
 		System.out.println("User: " + user.getEmail() + " (ID: " + user.getUserId() + ")");
 		System.out.println("Cookie secure setting: " + cookieSecure);
@@ -105,11 +116,10 @@ public class AuthenticationService {
 		// Create access token cookie with all security attributes
 		ResponseCookie accessCookie = ResponseCookie.from("accessToken", jwtToken)
 		                                            .httpOnly(true)           // Cannot be accessed by JavaScript
-		                                            .secure(cookieSecure)     // Only sent over HTTPS (configurable
-		                                            // for dev/prod)
+		                                            .secure(cookieSecure)     // Only sent over HTTPS (configurable for dev/prod)
 		                                            .path("/")                // Available for all paths
-		                                            .maxAge(24 * 60 * 60)     // 24 hours
-		                                            .sameSite(cookieSameSite)          // CSRF protection
+		                                            .maxAge(15 * 60)          // 15 minutes
+		                                            .sameSite(cookieSameSite) // CSRF protection
 		                                            .build();
 
 		// Create refresh token cookie
@@ -129,11 +139,14 @@ public class AuthenticationService {
 
 		System.out.println("✓ Cookies added to response headers");
 		System.out.println("--- End Setting Cookies ---");
+	}
 
-		// Return tokens in response body as well
-		return AuthenticationResponse.builder()
-		                             .accessToken(jwtToken)
-		                             .refreshToken(refreshToken)
-		                             .build();
+	private UserResponseDTO mapToResponseDTO(Users user) {
+		return new UserResponseDTO(user.getUserId(),
+		                           user.getName(),
+		                           user.getEmail(),
+		                           user.getPhoneNumber(),
+		                           user.getCreatedAt(),
+		                           user.getUpdatedAt());
 	}
 }

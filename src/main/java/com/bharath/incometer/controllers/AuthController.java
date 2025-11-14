@@ -1,10 +1,10 @@
 package com.bharath.incometer.controllers;
 
-import com.bharath.incometer.models.AuthenticationResponse;
+import com.bharath.incometer.entities.DTOs.UserResponseDTO;
 import com.bharath.incometer.models.LoginRequest;
-import com.bharath.incometer.models.RefreshRequest;
 import com.bharath.incometer.models.RegisterRequest;
 import com.bharath.incometer.service.auth.AuthenticationService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,29 +29,29 @@ public class AuthController {
 	private String cookieSameSite;
 
 	@PostMapping("/register")
-	public ResponseEntity<AuthenticationResponse> register(
+	public ResponseEntity<UserResponseDTO> register(
 		@RequestBody RegisterRequest request, HttpServletResponse response) {
 		System.out.println(">>> POST /api/v1/auth/register - Email: " + request.getEmail());
-		AuthenticationResponse result = service.register(request, response);
-		System.out.println("<<< Register response: tokens generated");
+		UserResponseDTO result = service.register(request, response);
+		System.out.println("<<< Register response: " + result);
 		return ResponseEntity.ok(result);
 	}
 
 	@PostMapping("/authenticate")
-	public ResponseEntity<AuthenticationResponse> authenticate(
+	public ResponseEntity<UserResponseDTO> authenticate(
 		@RequestBody LoginRequest request, HttpServletResponse response) {
 		System.out.println(">>> POST /api/v1/auth/authenticate - Email: " + request.getEmail());
-		AuthenticationResponse result = service.authenticate(request, response);
-		System.out.println("<<< Authenticate response: tokens generated");
+		UserResponseDTO result = service.authenticate(request, response);
+		System.out.println("<<< Authenticate response: " + result);
 		return ResponseEntity.ok(result);
 	}
 
 	@PostMapping("/refresh")
-	public ResponseEntity<AuthenticationResponse> refresh(
-		@RequestBody RefreshRequest request, HttpServletResponse response) {
+	public ResponseEntity<String> refresh(
+		HttpServletRequest request, HttpServletResponse response) {
 		System.out.println(">>> POST /api/v1/auth/refresh");
-		AuthenticationResponse result = service.refresh(request, response);
-		System.out.println("<<< Refresh response: tokens generated");
+		String result = service.refresh(request, response);
+		System.out.println("<<< Refresh response: " + result);
 		return ResponseEntity.ok(result);
 	}
 
