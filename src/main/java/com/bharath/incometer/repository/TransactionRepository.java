@@ -29,6 +29,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 	List<Transaction> findByUserUserIdAndTransactionTypeAndTransactionDateBetween(
 		UUID userId, TransactionType transactionType, LocalDate startDate, LocalDate endDate);
 
+	List<Transaction> findByUserUserIdOrderByTransactionDateDesc(UUID userId);
+
 	@Query("SELECT SUM(t.amount) FROM Transaction t WHERE t.user.userId = :userId")
 	BigDecimal sumAmountByUserId(
 		@Param("userId") UUID userId);

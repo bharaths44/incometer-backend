@@ -2,38 +2,45 @@ package com.bharath.incometer.service.bot;
 
 import com.bharath.incometer.entities.Users;
 import com.bharath.incometer.repository.UsersRepository;
-import com.bharath.incometer.service.TwilioService;
-import com.bharath.incometer.models.WhatsAppMessageRequest;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class WhatsAppMessageProcessor {
 
 	private final UsersRepository usersRepository;
-	private final TransactionMessageHandler transactionHandler;
-	private final TwilioService twilioService;
+	private final WhatsAppCommandHandler commandHandler;
 
-	@Value("${app.registration-url}")
-	private String registrationUrl;
 
-	public WhatsAppMessageProcessor(UsersRepository usersRepository,
-	                                TransactionMessageHandler transactionHandler,
-	                                TwilioService twilioService) {
+	public WhatsAppMessageProcessor(UsersRepository usersRepository, WhatsAppCommandHandler commandHandler) {
 		this.usersRepository = usersRepository;
-		this.transactionHandler = transactionHandler;
-		this.twilioService = twilioService;
+		this.commandHandler = commandHandler;
 	}
+
 	public void processMessage(String from, String body) {
-		body = body.trim();
+		String normalizedBody = (body == null ? "" : body.trim());
+		String lowerBody = normalizedBody.toLowerCase();
 
 		Users user = usersRepository.findByPhoneNumber(from);
 		if (user == null) {
-			String message = "❌ You are not registered. Please register at " + registrationUrl;
-			twilioService.sendWhatsAppMessage(from, message);
+			commandHandler.handleUnregisteredUser(from);
 			return;
 		}
-		WhatsAppMessageRequest reply = transactionHandler.handleTransactionMessage(user, body);
-		twilioService.sendWhatsAppMessage(from, reply);
+
+		// Handle commands
+		switch (lowerBody) {
+			case "hello", "hi" -> commandHandler.handleGreetings(from);
+			case "help" -> commandHandler.handleHelp(from);
+			case "balance" -> commandHandler.handleBalance(from, user);
+			case "list transactions" -> commandHandler.handleListTransactions(from, user);
+			default -> {
+				if (lowerBody.startsWith("summary")) {
+					commandHandler.handleSummary(from, normalizedBody, user);
+				} else if (lowerBody.startsWith("category summary")) {
+					commandHandler.handleCategorySummary(from, normalizedBody, user);
+				} else {
+					commandHandler.handleDefaultTransaction(from, user, normalizedBody);
+				}
+			}
+		}
 	}
 }

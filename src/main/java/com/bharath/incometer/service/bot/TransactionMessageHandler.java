@@ -24,8 +24,7 @@ public class TransactionMessageHandler {
 
 	private final Map<String, PendingCategory> pendingCategoryMap = new HashMap<>();
 
-	public TransactionMessageHandler(TransactionService transactionService,
-	                                 NLPService nlpService,
+	public TransactionMessageHandler(TransactionService transactionService, NLPService nlpService,
 	                                 TwilioService twilioService) {
 		this.transactionService = transactionService;
 		this.nlpService = nlpService;
@@ -45,9 +44,14 @@ public class TransactionMessageHandler {
 			return nlpService.handleIncome(user, body, pendingCategoryMap);
 		}
 
-		return new WhatsAppMessageRequest(
-			"Invalid format I couldn't parse that. Send transactions like: Expense 250 Coffee credit-card or Income " +
-			"500 Salary bank Or reply Help for examples.");
+		return new WhatsAppMessageRequest("""
+			                                  🤔 I didn't quite get that.
+			                                  
+			                                  Type *help* to see available commands or\
+			                                   try:
+			                                  • spent 50 groceries
+			                                  • received 1000 salary
+			                                  • balance""");
 	}
 
 	@Scheduled(fixedRate = 60000)

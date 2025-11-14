@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -295,24 +296,95 @@ public class TransactionService {
 	}
 
 	@Transactional(readOnly = true)
-	public BigDecimal getTotalAmountByUserId(UUID userId) {
+	public BigDecimal getBalance(UUID userId) {
 		if (userId == null) {
 			throw new IllegalArgumentException("User ID cannot be null");
 		}
 
-		return transactionRepository.sumAmountByUserId(userId);
+		BigDecimal income = transactionRepository.sumAmountByUserIdAndType(userId, TransactionType.INCOME);
+		BigDecimal expense = transactionRepository.sumAmountByUserIdAndType(userId, TransactionType.EXPENSE);
+		return (income != null ? income : BigDecimal.ZERO).subtract(expense != null ? expense : BigDecimal.ZERO);
 	}
 
 	@Transactional(readOnly = true)
-	public BigDecimal getTotalAmountByUserIdAndType(UUID userId, TransactionType transactionType) {
+	public Map<String, BigDecimal> getSummaryByPeriod(UUID userId, LocalDate startDate, LocalDate endDate) {
 		if (userId == null) {
 			throw new IllegalArgumentException("User ID cannot be null");
 		}
 
-		if (transactionType == null) {
-			throw new IllegalArgumentException("Transaction type cannot be null");
+		if (startDate == null || endDate == null) {
+			throw new IllegalArgumentException("Start date and end date cannot be null");
 		}
 
-		return transactionRepository.sumAmountByUserIdAndType(userId, transactionType);
+		if (startDate.isAfter(endDate)) {
+			throw new IllegalArgumentException("Start date cannot be after end date");
+		}
+
+		List<Transaction> transactions = transactionRepository.findByUserUserIdAndTransactionDateBetween(userId, startDate, endDate);
+
+		BigDecimal income = transactions.stream()
+		                                .filter(t -> t.getTransactionType() == TransactionType.INCOME)
+		                                .map(Transaction::getAmount)
+		                                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+		BigDecimal expense = transactions.stream()
+		                                 .filter(t -> t.getTransactionType() == TransactionType.EXPENSE)
+		                                 .map(Transaction::getAmount)
+		                                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+		return Map.of("income", income, "expense", expense);
+	}
+
+	@Transactional(readOnly = true)
+	public Map<String, BigDecimal> getCategorySummary(UUID userId) {
+		if (userId == null) {
+			throw new IllegalArgumentException("User ID cannot be null");
+		}
+
+		List<Transaction> transactions = transactionRepository.findByUserUserId(userId);
+
+		return transactions.stream()
+		                   .filter(t -> t.getTransactionType() == TransactionType.EXPENSE)
+		                   .collect(Collectors.groupingBy(
+			                   t -> t.getCategory().getName(),
+			                   Collectors.reducing(BigDecimal.ZERO, Transaction::getAmount, BigDecimal::add)
+		                   ));
+	}
+
+	@Transactional(readOnly = true)
+	public List<TransactionResponseDTO> getRecentTransactions(UUID userId, int limit) {
+		if (userId == null) {
+			throw new IllegalArgumentException("User ID cannot be null");
+		}
+
+		return transactionRepository.findByUserUserIdOrderByTransactionDateDesc(userId)
+		                            .stream()
+		                            .limit(limit)
+		                            .map(this::toDTO)
+		                            .collect(Collectors.toList());
+	}
+
+	@Transactional(readOnly = true)
+	public Map<String, BigDecimal> getCategorySummaryByPeriod(UUID userId, LocalDate startDate, LocalDate endDate) {
+		if (userId == null) {
+			throw new IllegalArgumentException("User ID cannot be null");
+		}
+
+		if (startDate == null || endDate == null) {
+			throw new IllegalArgumentException("Start date and end date cannot be null");
+		}
+
+		if (startDate.isAfter(endDate)) {
+			throw new IllegalArgumentException("Start date cannot be after end date");
+		}
+
+		List<Transaction> transactions = transactionRepository.findByUserUserIdAndTransactionDateBetween(userId, startDate, endDate);
+
+		return transactions.stream()
+		                   .filter(t -> t.getTransactionType() == TransactionType.EXPENSE)
+		                   .collect(Collectors.groupingBy(
+			                   t -> t.getCategory().getName(),
+			                   Collectors.reducing(BigDecimal.ZERO, Transaction::getAmount, BigDecimal::add)
+		                   ));
 	}
 }
