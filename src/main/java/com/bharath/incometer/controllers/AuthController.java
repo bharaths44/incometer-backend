@@ -1,5 +1,6 @@
 package com.bharath.incometer.controllers;
 
+import com.bharath.incometer.models.AuthenticationResponse;
 import com.bharath.incometer.models.LoginRequest;
 import com.bharath.incometer.models.RefreshRequest;
 import com.bharath.incometer.models.RegisterRequest;
@@ -28,29 +29,29 @@ public class AuthController {
 	private String cookieSameSite;
 
 	@PostMapping("/register")
-	public ResponseEntity<String> register(
+	public ResponseEntity<AuthenticationResponse> register(
 		@RequestBody RegisterRequest request, HttpServletResponse response) {
 		System.out.println(">>> POST /api/v1/auth/register - Email: " + request.getEmail());
-		String result = service.register(request, response);
-		System.out.println("<<< Register response: " + result);
+		AuthenticationResponse result = service.register(request, response);
+		System.out.println("<<< Register response: tokens generated");
 		return ResponseEntity.ok(result);
 	}
 
 	@PostMapping("/authenticate")
-	public ResponseEntity<String> authenticate(
+	public ResponseEntity<AuthenticationResponse> authenticate(
 		@RequestBody LoginRequest request, HttpServletResponse response) {
 		System.out.println(">>> POST /api/v1/auth/authenticate - Email: " + request.getEmail());
-		String result = service.authenticate(request, response);
-		System.out.println("<<< Authenticate response: " + result);
+		AuthenticationResponse result = service.authenticate(request, response);
+		System.out.println("<<< Authenticate response: tokens generated");
 		return ResponseEntity.ok(result);
 	}
 
 	@PostMapping("/refresh")
-	public ResponseEntity<String> refresh(
+	public ResponseEntity<AuthenticationResponse> refresh(
 		@RequestBody RefreshRequest request, HttpServletResponse response) {
 		System.out.println(">>> POST /api/v1/auth/refresh");
-		String result = service.refresh(request, response);
-		System.out.println("<<< Refresh response: " + result);
+		AuthenticationResponse result = service.refresh(request, response);
+		System.out.println("<<< Refresh response: tokens generated");
 		return ResponseEntity.ok(result);
 	}
 

@@ -2,6 +2,7 @@ package com.bharath.incometer.service.auth;
 
 import com.bharath.incometer.entities.Users;
 import com.bharath.incometer.enums.Role;
+import com.bharath.incometer.models.AuthenticationResponse;
 import com.bharath.incometer.models.LoginRequest;
 import com.bharath.incometer.models.RefreshRequest;
 import com.bharath.incometer.models.RegisterRequest;
@@ -29,7 +30,7 @@ public class AuthenticationService {
 	@Value("${app.cookie.sameSite:Lax}")
 	private String cookieSameSite;
 
-	public String register(RegisterRequest request, HttpServletResponse response) {
+	public AuthenticationResponse register(RegisterRequest request, HttpServletResponse response) {
 		System.out.println("=== REGISTER START ===");
 		System.out.println("Registering user: " + request.getEmail());
 		var user = new Users();
@@ -39,12 +40,12 @@ public class AuthenticationService {
 		user.setRole(Role.USER);
 		repository.save(user);
 		System.out.println("User saved to database with ID: " + user.getUserId());
-		setAuthenticationCookies(response, user);
+		AuthenticationResponse authResponse = setAuthenticationCookies(response, user);
 		System.out.println("=== REGISTER END ===\n");
-		return "User registered successfully";
+		return authResponse;
 	}
 
-	public String authenticate(LoginRequest request, HttpServletResponse response) {
+	public AuthenticationResponse authenticate(LoginRequest request, HttpServletResponse response) {
 		System.out.println("=== AUTHENTICATE START ===");
 		System.out.println("Authenticating user: " + request.getEmail());
 		var user = repository.findByEmail(request.getEmail()).orElseThrow(() -> new RuntimeException("User not " +
@@ -58,12 +59,12 @@ public class AuthenticationService {
 		authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(),
 		                                                                           request.getPassword()));
 		System.out.println("✓ Password validated successfully for: " + request.getEmail());
-		setAuthenticationCookies(response, user);
+		AuthenticationResponse authResponse = setAuthenticationCookies(response, user);
 		System.out.println("=== AUTHENTICATE END ===\n");
-		return "User authenticated successfully";
+		return authResponse;
 	}
 
-	public String refresh(RefreshRequest request, HttpServletResponse response) {
+	public AuthenticationResponse refresh(RefreshRequest request, HttpServletResponse response) {
 		String refreshToken = request.getRefreshToken();
 		String username = jwtService.extractUsername(refreshToken);
 		var user = repository.findByEmail(username).orElseThrow(() -> new RuntimeException("User not found"));
@@ -80,13 +81,17 @@ public class AuthenticationService {
 			                                            .build();
 
 			response.addHeader("Set-Cookie", accessCookie.toString());
-			return "Token refreshed successfully";
+
+			return AuthenticationResponse.builder()
+			                             .accessToken(newAccessToken)
+			                             .refreshToken(refreshToken)
+			                             .build();
 		} else {
 			throw new RuntimeException("Invalid refresh token");
 		}
 	}
 
-	private void setAuthenticationCookies(HttpServletResponse response, Users user) {
+	private AuthenticationResponse setAuthenticationCookies(HttpServletResponse response, Users user) {
 		System.out.println("--- Setting Authentication Cookies ---");
 		System.out.println("User: " + user.getEmail() + " (ID: " + user.getUserId() + ")");
 		System.out.println("Cookie secure setting: " + cookieSecure);
@@ -124,5 +129,11 @@ public class AuthenticationService {
 
 		System.out.println("✓ Cookies added to response headers");
 		System.out.println("--- End Setting Cookies ---");
+
+		// Return tokens in response body as well
+		return AuthenticationResponse.builder()
+		                             .accessToken(jwtToken)
+		                             .refreshToken(refreshToken)
+		                             .build();
 	}
 }
