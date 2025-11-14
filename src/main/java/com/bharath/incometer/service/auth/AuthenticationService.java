@@ -28,7 +28,7 @@ public class AuthenticationService {
 	@Value("${app.cookie.secure:true}")
 	private boolean cookieSecure;
 
-	@Value("${app.cookie.sameSite:Lax}")
+	@Value("${app.cookie.sameSite:None}")
 	private String cookieSameSite;
 
 	public UserResponseDTO register(RegisterRequest request, HttpServletResponse response) {
