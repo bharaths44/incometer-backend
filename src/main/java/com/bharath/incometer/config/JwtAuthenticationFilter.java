@@ -1,5 +1,7 @@
 package com.bharath.incometer.config;
 
+import com.bharath.incometer.entities.Users;
+import com.bharath.incometer.repository.UsersRepository;
 import com.bharath.incometer.service.auth.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -16,9 +18,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-
-import com.bharath.incometer.repository.UsersRepository;
-import com.bharath.incometer.entities.Users;
 
 import java.io.IOException;
 
@@ -56,7 +55,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			if (cookies != null) {
 				System.out.println("Found " + cookies.length + " cookies");
 				for (Cookie cookie : cookies) {
-					System.out.println("Cookie: " + cookie.getName() + " = " + cookie.getValue().substring(0, Math.min(20, cookie.getValue().length())) + "...");
+					System.out.println("Cookie: " + cookie.getName() + " = " +
+					                   cookie.getValue().substring(0, Math.min(20, cookie.getValue().length())) +
+					                   "...");
 					if ("accessToken".equals(cookie.getName())) {
 						token = cookie.getValue();
 						System.out.println("✓ AccessToken found in cookies");
@@ -64,8 +65,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 					}
 				}
 
-				// Only try refresh if we have cookies but no accessToken
-				if (token == null) {
+				// Only try refresh if:
+				// 1. We have cookies but no accessToken
+				// 2. Authentication is not already set (prevents concurrent request spam)
+				if (token == null && SecurityContextHolder.getContext().getAuthentication() == null) {
 					// Try to refresh using refreshToken
 					String refreshToken = null;
 					for (Cookie cookie : cookies) {
@@ -81,7 +84,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 							var userDetails = userDetailsService.loadUserByUsername(username);
 							if (jwtService.isTokenValid(refreshToken, userDetails)) {
 								System.out.println("✓ RefreshToken is valid, generating new access token");
-								Users userEntity = usersRepository.findByEmail(username).orElseThrow(() -> new RuntimeException("User not found"));
+								Users userEntity = usersRepository.findByEmail(username)
+								                                  .orElseThrow(() -> new RuntimeException(
+									                                  "User not found"));
 								String newAccessToken = jwtService.generateToken(userEntity);
 
 								// Set new access token cookie
@@ -95,12 +100,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 								response.addHeader("Set-Cookie", accessCookie.toString());
 
 								// Set authentication for this request
-								UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
-								                                                                                        null,
-								                                                                                        userDetails.getAuthorities());
+								UsernamePasswordAuthenticationToken authToken =
+									new UsernamePasswordAuthenticationToken(
+										userDetails,
+										null,
+										userDetails.getAuthorities());
 								authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 								SecurityContextHolder.getContext().setAuthentication(authToken);
-								System.out.println("✓ New access token generated and authentication set for user: " + username);
+								System.out.println(
+									"✓ New access token generated and authentication set for user: " + username);
 								filterChain.doFilter(request, response);
 								return;
 							} else {
@@ -110,6 +118,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 							System.out.println("❌ Error during token refresh: " + e.getMessage());
 						}
 					}
+				} else if (SecurityContextHolder.getContext().getAuthentication() != null) {
+					System.out.println("ℹ️ Skipping refresh - authentication already exists in context");
 				}
 			} else {
 				System.out.println("No cookies found in request");
